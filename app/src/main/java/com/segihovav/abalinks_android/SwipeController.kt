@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.max
 import kotlin.math.min
 import androidx.appcompat.app.AppCompatActivity
+import java.util.ArrayList
 
 internal enum class ButtonsState {
     GONE, LEFT_VISIBLE, RIGHT_VISIBLE
@@ -22,6 +23,11 @@ internal class SwipeController(
     private var buttonShowedState = ButtonsState.GONE
     private var buttonInstance: RectF? = null
     private var mainActivity: AppCompatActivity? = null;
+    private var linkTypes: MutableList<String> = ArrayList()
+
+    fun setLinkTypes(_linkTypes: MutableList<String> = ArrayList()) {
+         this.linkTypes=_linkTypes;
+    }
 
     fun setMainActivity(_mainActivity: AppCompatActivity) {
         this.mainActivity=_mainActivity;
@@ -71,7 +77,7 @@ internal class SwipeController(
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setTouchListener(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
-        recyclerView.setOnTouchListener { v, event ->
+        recyclerView.setOnTouchListener { _, event ->
             swipeBack = event.action == MotionEvent.ACTION_CANCEL || event.action == MotionEvent.ACTION_UP
             if (swipeBack) {
                 if (dX < -buttonWidth) {
@@ -91,7 +97,7 @@ internal class SwipeController(
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setTouchDownListener(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
-        recyclerView.setOnTouchListener { v, event ->
+        recyclerView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 setTouchUpListener(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             }
@@ -101,15 +107,15 @@ internal class SwipeController(
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setTouchUpListener(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
-        recyclerView.setOnTouchListener { v, event ->
+        recyclerView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
                 super@SwipeController.onChildDraw(c, recyclerView, viewHolder, 0f, dY, actionState, isCurrentlyActive)
-                recyclerView.setOnTouchListener { v, event -> false }
+                recyclerView.setOnTouchListener { _, _ -> false }
                 setItemsClickable(recyclerView, true)
                 //swipeBack = false
                 if (buttonsActions != null && buttonInstance != null && buttonInstance!!.contains(event.x, event.y)) {
                     if (buttonShowedState == ButtonsState.LEFT_VISIBLE) {
-                        mainActivity?.let { buttonsActions.onLeftClicked(abaLinksList, viewHolder.adapterPosition, it) }
+                        mainActivity?.let { buttonsActions.onLeftClicked(abaLinksList, viewHolder.adapterPosition, it,linkTypes) }
                     } else if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
                         buttonsActions.onRightClicked(abaLinksList, viewHolder.adapterPosition)
                     }
@@ -132,7 +138,7 @@ internal class SwipeController(
         val corners = 16f
         val itemView = viewHolder.itemView
         val p = Paint()
-        val pos = viewHolder.adapterPosition
+        //val pos = viewHolder.adapterPosition
 
         // Draw edit icon for first item only
         //val editBitmap = BitmapFactory.decodeResource(viewHolder.itemView.resources, R.drawable.edit)

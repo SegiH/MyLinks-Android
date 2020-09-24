@@ -37,6 +37,7 @@ import java.util.*
 class MainActivity : AppCompatActivity(), OnRefreshListener {
     private var abaLinksURL: String? = null
     private val abaLinksList: MutableList<AbaLinks> = ArrayList()
+    private val abaLinksTypes: MutableList<String> = ArrayList()
     private var searchView: EditText? = null
     private var swipeController: SwipeController? = null
     private var sharedPreferences: SharedPreferences? = null
@@ -61,9 +62,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
         // Init the SwipeController
         val mSwipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.swipe_container)
         swipeController = SwipeController(object : SwipeControllerActions() {}, abaLinksList)
-
-        // delete me if this doesnt work!!!!
         swipeController!!.setMainActivity(this);
+        swipeController!!.setLinkTypes(abaLinksTypes)
 
         // init swipe listener
         mSwipeRefreshLayout.setOnRefreshListener(this)
@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
 
                     for (i in abaLinksList.indices) {
                         // If the search term is contained in the name or URL
-                        if (abaLinksList[i].name.toLowerCase(Locale.ROOT).contains(s.toString().toLowerCase(Locale.ROOT)) || abaLinksList[i].url.toString().contains(s)) {
+                        if (abaLinksList[i].Name.toLowerCase(Locale.ROOT).contains(s.toString().toLowerCase(Locale.ROOT)) || abaLinksList[i].URL.toString().contains(s)) {
                             abaLinksListFiltered.add(abaLinksList[i])
                         }
                     }
@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Implement this later!
         val id = item.itemId
-        val episodeListFiltered: MutableList<AbaLinks>
+        //val episodeListFiltered: MutableList<AbaLinks>
 
         // Make search view hidden by default. It will be shown if needed
         searchViewIsVisible(false)
@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
         abaLinkNames.clear()
 
         for (i in arrayList.indices) {
-            abaLinkNames.add(arrayList[i].name);
+            abaLinkNames.add(arrayList[i].Name);
         }
 
         // specify an adapter (see also next example)
@@ -285,10 +285,48 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
                         }
                     }
                     initRecyclerView(abaLinksList)
+
+                    loadTypes()
                 },
                 Response.ErrorListener {
                     //System.out.println("****** Error response=" + error.toString());
                 })
+        requestQueue.add(request)
+    }
+
+    private fun loadTypes() {
+         val getLinkDataEndpoint = "LinkData.php?task=fetchTypes"
+         val requestQueue: RequestQueue = Volley.newRequestQueue(this)
+         val request = JsonArrayRequest(
+         Request.Method.GET,
+         abaLinksURL + getLinkDataEndpoint,
+        null,
+         Response.Listener { response ->
+             var jsonarray: JSONArray? = null
+
+             try {
+                  jsonarray = JSONArray(response.toString())
+             } catch (e: JSONException) {
+                  e.printStackTrace()
+             }
+
+             if (BuildConfig.DEBUG && jsonarray == null) {
+                  error("Assertion failed")
+             }
+
+             for (i in 0 until jsonarray!!.length()) {
+                  try {
+                       val jsonobject = jsonarray.getJSONObject(i)
+
+                       abaLinksTypes.add(jsonobject.getString("name"))
+                  } catch (e: JSONException) {
+                       e.printStackTrace()
+                  }
+             }
+        },
+        Response.ErrorListener {
+             //System.out.println("****** Error response=" + error.toString());
+        })
         requestQueue.add(request)
     }
 

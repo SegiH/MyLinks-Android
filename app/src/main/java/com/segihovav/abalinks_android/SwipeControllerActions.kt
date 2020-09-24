@@ -17,10 +17,18 @@ abstract class SwipeControllerActions {
     private lateinit var requestQueue: RequestQueue
 
     // Edit
-    fun onLeftClicked(episode: List<AbaLinks>, position: Int,mainActivity: AppCompatActivity) {
+    fun onLeftClicked(episode: List<AbaLinks>, position: Int,mainActivity: AppCompatActivity,linkTypes: MutableList<String> = ArrayList()) {
         //mainActivity.intent = = Intent(this, EditActivity::class.java)
         val intent = Intent(mainActivity, EditActivity::class.java)
+        intent.putExtra("EpisodeID",episode[position].ID)
+        intent.putExtra("EpisodeName",episode[position].Name)
+        intent.putExtra("EpisodeURL",episode[position].URL)
+        intent.putExtra("EpisodeTypeID",episode[position].TypeID)
+        intent.putExtra("LinkTypes",linkTypes.toHashSet())
+
         mainActivity.startActivity(intent)
+
+        //MainActivity.context?.startActivity(intent)
         //startActivity(Edi)
 
         //val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(MainActivity.context))
@@ -47,17 +55,17 @@ abstract class SwipeControllerActions {
 
     // Favorite button event
     fun onRightClicked(episode: List<AbaLinks>, position: Int) {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(MainActivity.context))
-        val wtfIndexerURL = sharedPreferences.getString("WTFIndexerURL", "") + if (!sharedPreferences.getString("WTFIndexerURL", "")!!.endsWith("/")) "/" else ""
-        val updateEpisodeFavoriteEndpoint = "WTF.php?UpdateFavorite"
+        //val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(MainActivity.context))
+        //val wtfIndexerURL = sharedPreferences.getString("WTFIndexerURL", "") + if (!sharedPreferences.getString("WTFIndexerURL", "")!!.endsWith("/")) "/" else ""
+        //val updateEpisodeFavoriteEndpoint = "WTF.php?UpdateFavorite"
 
 
         // Toggle favorite value
        // episode[position].toggleFavorite()
 
         // Call REST endpoint to update the favorite for the current episode
-        requestQueue = Volley.newRequestQueue(MainActivity.context)
-        /*val request = JsonArrayRequest(
+        /*requestQueue = Volley.newRequestQueue(MainActivity.context)
+          val request = JsonArrayRequest(
                 Request.Method.GET,
                 wtfIndexerURL + updateEpisodeFavoriteEndpoint + "&EpisodeNumber=" + episode[position].episodeNumber + "&FavoriteValue=" + episode[position].favorite,
                 null,

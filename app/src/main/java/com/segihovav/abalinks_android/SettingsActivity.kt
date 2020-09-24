@@ -11,13 +11,13 @@ import androidx.preference.PreferenceManager
 import com.google.android.material.textfield.TextInputLayout
 
 class SettingsActivity : AppCompatActivity() {
-    private lateinit var abaLinksURL: TextInputLayout
-    private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var darkModeCheckbox: Switch
-    private val darkMode = R.style.Theme_AppCompat_DayNight
-    private val lightMode = R.style.ThemeOverlay_MaterialComponents
-    private var darkModeToggled = false
-    override fun onCreate(savedInstanceState: Bundle?) {
+     private lateinit var abaLinksURL: TextInputLayout
+     private lateinit var sharedPreferences: SharedPreferences
+     private lateinit var darkModeCheckbox: Switch
+     private val darkMode = R.style.Theme_AppCompat_DayNight
+     private val lightMode = R.style.ThemeOverlay_MaterialComponents
+     private var darkModeToggled = false
+     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         this.setTheme(if (sharedPreferences.getBoolean("DarkThemeOn", false)) darkMode else lightMode)
 

@@ -1,6 +1,6 @@
 # AbaLinks-Android
 
-AbaLinks-Android is an Android app that I developed in Kotlin as a companion app to my app WTFIndexer. 
+AbaLinks-Android is an Android app that I developed in Kotlin as a companion app to my app AbaLinks. 
 
 This app supports all of the same features that the web app does but was developed as a native Android App for easy access.
 
