@@ -20,3 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 #-keep class android.widget.SearchView { *; }
+-keepclassmembers class * implements android.os.Parcelable {
+    static ** CREATOR;
+}

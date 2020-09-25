@@ -38,7 +38,7 @@ class AbaLinksAdapter(private val names: List<String>?,private val abaLinksTypeN
             holder.name.text = names!![position];
         }
 
-        //holder.typeInfo.text=abaLinksTypeNames[position]
+        holder.typeInfo.text=abaLinksTypeNames[position]
     }
 
     override fun getItemCount(): Int {

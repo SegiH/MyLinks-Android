@@ -18,6 +18,7 @@ import com.android.volley.toolbox.Volley
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONArray
 import org.json.JSONException
+import java.lang.Exception
 import java.util.*
 
 
@@ -25,7 +26,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
      private lateinit var sharedPreferences: SharedPreferences
      private val darkMode = R.style.Theme_AppCompat_DayNight
      private val lightMode = R.style.ThemeOverlay_MaterialComponents
-     private lateinit var link: AbaLink;
+     private var link: AbaLink? = null;
      private val abaLinksTypes: ArrayList<AbaLinkType> = ArrayList()
      private val abaLinksTypeNames: ArrayList<String> = ArrayList()
      private var abaLinksURL: String? = null
@@ -43,41 +44,12 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
           abaLinksURL = if (sharedPreferences!!.getString("AbaLinksURL", "") != "") sharedPreferences!!.getString("AbaLinksURL", "") + (if (!sharedPreferences!!.getString("AbaLinksURL", "")!!.endsWith("/")) "/" else "") else ""
 
-          val extras = intent.extras
-
-          if (extras != null) {
-               link=extras.getParcelable<AbaLink>("Link")!!
-          }
-
-          if (extras!!.getBoolean("IsAdding") != null && extras!!.getBoolean("IsAdding") == true)
-               isAdding = true
-
-          abaLinksTypes.clear()
-
-          var counter = 0
-
-          while (intent.extras!!.getString("LinkTypeID" + counter) != null) {
-               var LinkTypeID=intent.extras!!.getString("LinkTypeID" + counter)!!.toInt()
-               var LinkTypeName=intent.extras!!.getString("LinkTypeName" + counter)
-
-               //abaLinksTypes.add(AbaLinkType(ID,Name))
-               abaLinksTypes.add(AbaLinkType(LinkTypeID, LinkTypeName))
-
-               if (LinkTypeName != null && !LinkTypeName.equals("All")) {
-                    abaLinksTypeNames.add(LinkTypeName)
-               }
-
-               counter++
-          }
 
           val titleBar=findViewById<TextView>(R.id.TitleBar)
-          titleBar.setText("AbaLink # " + link.ID)
 
           Name=findViewById<TextInputLayout>(R.id.Name)
-          Name.editText!!.setText(link.Name)
 
           URL=findViewById<TextInputLayout>(R.id.URL)
-          URL.editText!!.setText(link.URL)
 
           typeIDSpinner = findViewById<Spinner>(R.id.TypeID)
 
@@ -90,10 +62,49 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           // attaching data adapter to spinner
           typeIDSpinner.setAdapter(dataAdapter);
 
-          for (i in abaLinksTypes.indices) {
-               if (abaLinksTypes[i].ID==link.TypeID) {
-                    typeIDSpinner.setSelection(i-1)
-               }
+          val extras = intent.extras
+
+          if (extras != null) {
+            try {
+              if (extras!!.getBoolean("IsAdding") == true) {
+                isAdding = true
+
+                link = extras.getParcelable<AbaLink>("Link")!!
+
+                titleBar.setText("New link")
+              }
+            } catch (e: Exception) {
+              isAdding = false
+            }
+
+            if (!isAdding) {
+              /*abaLinksTypes.clear()
+
+              var counter = 0
+
+              while (intent.extras!!.getString("LinkTypeID" + counter) != null) {
+                var LinkTypeID = intent.extras!!.getString("LinkTypeID" + counter)!!.toInt()
+                var LinkTypeName = intent.extras!!.getString("LinkTypeName" + counter)
+
+                abaLinksTypes.add(AbaLinkType(LinkTypeID, LinkTypeName))
+
+                if (LinkTypeName != null && !LinkTypeName.equals("All"))
+                  abaLinksTypeNames.add(LinkTypeName)
+
+                counter++
+              }
+
+            titleBar.setText("AbaLink # " + link.ID)
+
+            Name.editText!!.setText(link.Name)
+
+            URL.editText!!.setText(link.URL)
+
+            for (i in abaLinksTypes.indices) {
+              if (abaLinksTypes[i].ID == link.TypeID)
+                typeIDSpinner.setSelection(i - 1)
+            }*/
+            }
           }
      }
 
@@ -113,8 +124,8 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           var params: String = ""
 
           // Save existing item
-          if (!isAdding) {
-               getLinkDataEndpoint = "LinkData.php?task=updateRow"
+          if (isAdding) {
+               /*getLinkDataEndpoint = "LinkData.php?task=updateRow"
 
                params="&rowID=" + link.ID + "&columnName=Name&columnValue=" + Name.editText!!.text
                processData(getLinkDataEndpoint, params)
@@ -133,10 +144,12 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                params="&rowID=" + link.ID + "&columnName=TypeID&columnValue=" + TypeID
 
                processData(getLinkDataEndpoint, params)
-          } else { // Save new item
-               getLinkDataEndpoint = "LinkData.php?task=insertRow"
 
-               params="&Name=" +  java.net.URLEncoder.encode(link.Name, "utf-8") + "&URL=" + java.net.URLEncoder.encode(link.URL, "utf-8") + "&Type=" + link.TypeID
+                */
+          } else { // Save new item
+               //getLinkDataEndpoint = "LinkData.php?task=insertRow"
+
+               //params="&Name=" +  java.net.URLEncoder.encode(link.Name, "utf-8") + "&URL=" + java.net.URLEncoder.encode(link.URL, "utf-8") + "&Type=" + link.TypeID
                //processData(getLinkDataEndpoint, params)
           }
 

@@ -38,8 +38,8 @@ import kotlin.collections.ArrayList
 // DONE - in edit panel move all fields more to the left
 // DONE - reload data after returning from editactivity
 // DONE - add URL on main list
+// DONE - add additional info below name
 
-// add additional info below name
 // Implement adding
 // implement deleting
 // add search
@@ -148,6 +148,13 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
             startActivity(intent)
             return true
         } else if (id == R.id.action_add) {
+            val intent = Intent(this, EditActivity::class.java)
+
+            intent.putExtra("com.segihovav.abalinks_android.IsAdding",true)
+            //intent.extras!!.putString("IsAdding","true")
+            //intent.extras!!.putBoolean("IsAdding",true)
+
+            startActivity(intent)
         }
 
         return super.onOptionsItemSelected(item)
@@ -156,24 +163,25 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
     override fun onRefresh() { }
 
     // Fixes the issue that causes the swipe buttons to disappear when leaving the app
-    public override fun onResume() {
+    /*public override fun onResume() {
         super.onResume()
 
-        //loadTypes()
+        loadTypes()
 
         val recyclerView: RecyclerView = findViewById(R.id.episodeList)
         if (recyclerView.adapter != null) recyclerView.adapter!!.notifyDataSetChanged()
-    }
+    }*/
 
     // Event when this activity returns from another activity
     public override fun onStart() {
         super.onStart()
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        //val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         // Since onCreate() doesn't get called when returning from another activity, we have to set AbaLinksURL here
-        abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != "") sharedPreferences.getString("AbaLinksURL", "") + (if (!sharedPreferences.getString("AbaLinksURL", "")!!.endsWith("/")) "/" else "") else ""
+        //abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != "") sharedPreferences.getString("AbaLinksURL", "") + (if (!sharedPreferences.getString("AbaLinksURL", "")!!.endsWith("/")) "/" else "") else ""
 
-        loadTypes()
+        if (abaLinksTypes.size == 0)
+             loadTypes()
     }
 
     public override fun onStop() {
@@ -213,7 +221,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
             // continue here doesnt get populated
             // uncomment line 41 in AbaLinksAdapter when this is fixed
             for (j in abaLinksTypes.indices) {
-                if (abaLinksTypes[j].ID==arrayList[j].TypeID) {
+
+                if (abaLinksTypes[j].ID==arrayList[i].TypeID) {
                     abaLinkTypeNames.add(abaLinksTypes[j].Name!!)
                 }
             }
