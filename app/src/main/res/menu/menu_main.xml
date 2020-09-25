@@ -4,28 +4,19 @@
     tools:context="com.segihovav.abalinks_android.com.segihovav.abalinks_android.MainActivity">
 
     <item
-        android:id="@+id/favoritesOnly"
-        android:orderInCategory="100"
-        android:title="@string/favoritesOnly"
-        android:checkable="true"
-        android:visible="true"
-        />
-    <item
         android:id="@+id/action_search"
         android:orderInCategory="100"
         android:title=""
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/action_add"
+        android:orderInCategory="100"
+        android:title="@string/addLink"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never" />
-
-    <item
-        android:id="@+id/updateEpisodes"
-        android:orderInCategory="100"
-        android:title="@string/updateEpisodes"
-        android:visible="true"
-        />
 </menu>

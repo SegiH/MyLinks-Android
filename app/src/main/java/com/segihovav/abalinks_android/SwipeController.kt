@@ -2,10 +2,7 @@ package com.segihovav.abalinks_android
 
 import android.annotation.SuppressLint
 import android.graphics.*
-import android.graphics.drawable.Drawable
 import android.view.MotionEvent
-import android.widget.ImageView
-import androidx.core.graphics.withMatrix
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.max
@@ -14,18 +11,18 @@ import androidx.appcompat.app.AppCompatActivity
 import java.util.ArrayList
 
 internal enum class ButtonsState {
-    GONE, LEFT_VISIBLE, RIGHT_VISIBLE
+    GONE, LEFT_VISIBLE //, RIGHT_VISIBLE
 }
 
 internal class SwipeController(
-    private val buttonsActions: SwipeControllerActions?, private var abaLinksList: List<AbaLinks>) : ItemTouchHelper.Callback() {
+    private val buttonsActions: SwipeControllerActions?, private var abaLinksList: List<AbaLink>) : ItemTouchHelper.Callback() {
     private var swipeBack = false
     private var buttonShowedState = ButtonsState.GONE
     private var buttonInstance: RectF? = null
     private var mainActivity: AppCompatActivity? = null;
-    private var linkTypes: MutableList<String> = ArrayList()
+    private var linkTypes: ArrayList<AbaLinkType> = ArrayList()
 
-    fun setLinkTypes(_linkTypes: MutableList<String> = ArrayList()) {
+    fun setLinkTypes(_linkTypes: ArrayList<AbaLinkType>) {
          this.linkTypes=_linkTypes;
     }
 
@@ -33,7 +30,7 @@ internal class SwipeController(
         this.mainActivity=_mainActivity;
     }
 
-    fun setAbaLinksList(newAbaLinksList: List<AbaLinks>) {
+    fun setAbaLinksList(newAbaLinksList: List<AbaLink>) {
         abaLinksList = newAbaLinksList
     }
 
@@ -60,7 +57,7 @@ internal class SwipeController(
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
             if (buttonShowedState != ButtonsState.GONE) {
                 if (buttonShowedState == ButtonsState.LEFT_VISIBLE) dX = max(dX, buttonWidth)
-                if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) dX = min(dX, -buttonWidth)
+                //if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) dX = min(dX, -buttonWidth)
 
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             } else {
@@ -80,9 +77,10 @@ internal class SwipeController(
         recyclerView.setOnTouchListener { _, event ->
             swipeBack = event.action == MotionEvent.ACTION_CANCEL || event.action == MotionEvent.ACTION_UP
             if (swipeBack) {
-                if (dX < -buttonWidth) {
+                /*if (dX < -buttonWidth) {
                     buttonShowedState = ButtonsState.RIGHT_VISIBLE
-                } else if (dX > buttonWidth) {
+                } else*/
+                if (dX > buttonWidth) {
                     buttonShowedState = ButtonsState.LEFT_VISIBLE
                 }
 
@@ -116,9 +114,9 @@ internal class SwipeController(
                 if (buttonsActions != null && buttonInstance != null && buttonInstance!!.contains(event.x, event.y)) {
                     if (buttonShowedState == ButtonsState.LEFT_VISIBLE) {
                         mainActivity?.let { buttonsActions.onLeftClicked(abaLinksList, viewHolder.adapterPosition, it,linkTypes) }
-                    } else if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
+                    } /*else if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
                         buttonsActions.onRightClicked(abaLinksList, viewHolder.adapterPosition)
-                    }
+                    }*/
                 }
 
                 buttonShowedState = ButtonsState.GONE
@@ -164,18 +162,18 @@ internal class SwipeController(
         //customMatrix.setScale(1.0F,1.0F)
         //c.drawBitmap(editBitmap, customMatrix, p)
 
-        val rightButton = RectF(itemView.right - buttonWidthWithoutPadding, itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat())
+        /*val rightButton = RectF(itemView.right - buttonWidthWithoutPadding, itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat())
         p.color = Color.BLUE
         c.drawRoundRect(rightButton, corners, corners, p)
-        drawText("Delete",c, rightButton, p, 0)
+        drawText("Delete",c, rightButton, p, 0)*/
 
         buttonInstance = null
 
         if (buttonShowedState == ButtonsState.LEFT_VISIBLE) {
             buttonInstance = leftButton
-        } else if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
+        } /*else if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
             buttonInstance = rightButton
-        }
+        }*/
     }
 
     private fun drawText(text: String, c: Canvas, button: RectF, p: Paint, y: Int) {

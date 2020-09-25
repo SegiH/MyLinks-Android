@@ -33,7 +33,6 @@
             android:name="com.segihovav.abalinks_android.SettingsActivity"
             android:label="settings"
             android:theme="@style/AppTheme.NoActionBar" />
-editactivity
         <activity
             android:name="com.segihovav.abalinks_android.EditActivity"
             android:label="editactivity"

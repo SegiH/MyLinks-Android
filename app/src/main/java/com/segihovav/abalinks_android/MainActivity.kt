@@ -32,12 +32,23 @@ import com.android.volley.toolbox.Volley
 import org.json.JSONArray
 import org.json.JSONException
 import java.util.*
+import kotlin.collections.ArrayList
 
 // TO DO/Fix
+// DONE - in edit panel move all fields more to the left
+// DONE - reload data after returning from editactivity
+// DONE - add URL on main list
+
+// add additional info below name
+// Implement adding
+// implement deleting
+// add search
+// change app icon
+
 class MainActivity : AppCompatActivity(), OnRefreshListener {
     private var abaLinksURL: String? = null
-    private val abaLinksList: MutableList<AbaLinks> = ArrayList()
-    private val abaLinksTypes: MutableList<String> = ArrayList()
+    private val abaLinksList: MutableList<AbaLink> = ArrayList()
+    private var abaLinksTypes: ArrayList<AbaLinkType> = ArrayList()
     private var searchView: EditText? = null
     private var swipeController: SwipeController? = null
     private var sharedPreferences: SharedPreferences? = null
@@ -63,7 +74,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
         val mSwipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.swipe_container)
         swipeController = SwipeController(object : SwipeControllerActions() {}, abaLinksList)
         swipeController!!.setMainActivity(this);
-        swipeController!!.setLinkTypes(abaLinksTypes)
 
         // init swipe listener
         mSwipeRefreshLayout.setOnRefreshListener(this)
@@ -90,11 +100,11 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 if (s != "") {
-                    val abaLinksListFiltered: MutableList<AbaLinks> = ArrayList()
+                    val abaLinksListFiltered: MutableList<AbaLink> = ArrayList()
 
                     for (i in abaLinksList.indices) {
                         // If the search term is contained in the name or URL
-                        if (abaLinksList[i].Name.toLowerCase(Locale.ROOT).contains(s.toString().toLowerCase(Locale.ROOT)) || abaLinksList[i].URL.toString().contains(s)) {
+                        if (abaLinksList[i].Name?.toLowerCase(Locale.ROOT)!!.contains(s.toString().toLowerCase(Locale.ROOT)) || abaLinksList[i].URL.toString().contains(s)) {
                             abaLinksListFiltered.add(abaLinksList[i])
                         }
                     }
@@ -129,7 +139,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Implement this later!
         val id = item.itemId
-        //val episodeListFiltered: MutableList<AbaLinks>
 
         // Make search view hidden by default. It will be shown if needed
         searchViewIsVisible(false)
@@ -138,33 +147,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
             return true
-        } /* else if (id == R.id.favoritesOnly) { // Favorites menu
-            // Clear search field
-            searchView!!.setText("")
-
-            // toggle favorites checkbox
-            item.isChecked = !item.isChecked
-
-            // If favorites is checked, created filtered list of all episodes where favorites is checked
-            if (item.isChecked) {
-                episodeListFiltered = ArrayList()
-
-                for (i in abaLinksList.indices) {
-                    if (abaLinksList[i].favorite == 1) {
-                        episodeListFiltered.add(abaLinksList[i])
-                    }
-                }
-
-                // Call method that reloads the recycler view with the current data
-                initRecyclerView(episodeListFiltered)
-            } else { // Favorites is not checked
-                initRecyclerView(abaLinksList) // Load the recyclerview with the full data set
-            }
-        } else if (id == R.id.updateEpisodes) {
-            updateEpisodes()
-        } else if (id == R.id.action_search) {
-            searchViewIsVisible(true)
-        }*/
+        } else if (id == R.id.action_add) {
+        }
 
         return super.onOptionsItemSelected(item)
     }
@@ -174,6 +158,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
     // Fixes the issue that causes the swipe buttons to disappear when leaving the app
     public override fun onResume() {
         super.onResume()
+
+        //loadTypes()
+
         val recyclerView: RecyclerView = findViewById(R.id.episodeList)
         if (recyclerView.adapter != null) recyclerView.adapter!!.notifyDataSetChanged()
     }
@@ -186,9 +173,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
         // Since onCreate() doesn't get called when returning from another activity, we have to set AbaLinksURL here
         abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != "") sharedPreferences.getString("AbaLinksURL", "") + (if (!sharedPreferences.getString("AbaLinksURL", "")!!.endsWith("/")) "/" else "") else ""
 
-        if (abaLinksURL != "" && abaLinksList.size == 0) {
-            loadJSONData()
-        }
+        loadTypes()
     }
 
     public override fun onStop() {
@@ -209,8 +194,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
         alert.show()
     }
 
-    private fun initRecyclerView(arrayList: List<AbaLinks>) {
+    private fun initRecyclerView(arrayList: List<AbaLink>) {
         val abaLinkNames: MutableList<String>
+        val abaLinkTypeNames: MutableList<String> = ArrayList() // Used to save the typw
         val adapter: AbaLinksAdapter
         val layoutManager: RecyclerView.LayoutManager
         val mSwipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.swipe_container)
@@ -220,11 +206,21 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
         abaLinkNames.clear()
 
         for (i in arrayList.indices) {
-            abaLinkNames.add(arrayList[i].Name);
+            //arrayList[i].Name?.let { abaLinkNames.add(it) };
+            abaLinkNames.add("<A HREF='" + arrayList[i].URL + "'>" + arrayList[i].Name + "</A>" )
+
+            // Type
+            // continue here doesnt get populated
+            // uncomment line 41 in AbaLinksAdapter when this is fixed
+            for (j in abaLinksTypes.indices) {
+                if (abaLinksTypes[j].ID==arrayList[j].TypeID) {
+                    abaLinkTypeNames.add(abaLinksTypes[j].Name!!)
+                }
+            }
         }
 
         // specify an adapter (see also next example)
-        adapter = AbaLinksAdapter(abaLinkNames)
+        adapter = AbaLinksAdapter(abaLinkNames,abaLinkTypeNames)
         adapter.notifyDataSetChanged()
 
         layoutManager = LinearLayoutManager(applicationContext)
@@ -279,14 +275,13 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
                         try {
                             val jsonobject = jsonarray.getJSONObject(i)
 
-                            abaLinksList.add(AbaLinks(jsonobject.getString("ID").toInt(), jsonobject.getString("Name"), jsonobject.getString("URL"), jsonobject.getString("TypeID").toInt()))
+                            abaLinksList.add(AbaLink(jsonobject.getString("ID").toInt(), jsonobject.getString("Name"), jsonobject.getString("URL"), jsonobject.getString("TypeID").toInt()))
                         } catch (e: JSONException) {
                             e.printStackTrace()
                         }
                     }
-                    initRecyclerView(abaLinksList)
 
-                    loadTypes()
+                    initRecyclerView(abaLinksList)
                 },
                 Response.ErrorListener {
                     //System.out.println("****** Error response=" + error.toString());
@@ -314,15 +309,21 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
                   error("Assertion failed")
              }
 
+             abaLinksTypes.clear()
+
              for (i in 0 until jsonarray!!.length()) {
                   try {
                        val jsonobject = jsonarray.getJSONObject(i)
 
-                       abaLinksTypes.add(jsonobject.getString("name"))
+                       abaLinksTypes.add(AbaLinkType(jsonobject.getInt("id"),jsonobject.getString("value")))
                   } catch (e: JSONException) {
                        e.printStackTrace()
                   }
              }
+
+             swipeController!!.setLinkTypes(abaLinksTypes)
+
+             loadJSONData()
         },
         Response.ErrorListener {
              //System.out.println("****** Error response=" + error.toString());
@@ -342,28 +343,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
         searchView = findViewById(R.id.searchView)
         searchView!!.visibility = if (!isHidden) View.GONE else View.VISIBLE
         searchView!!.requestFocus()
-    }
-
-    /*private fun updateEpisodes() {
-        Toast.makeText(context, "Updating the episodes", Toast.LENGTH_LONG).show()
-
-        val updateEpisodesEndpoint = "WTF.php?ScrapeData"
-        val requestQueue: RequestQueue = Volley.newRequestQueue(this)
-        val request = JsonArrayRequest(
-                Request.Method.GET,
-                abaLinksURL + updateEpisodesEndpoint,
-                null,
-                Response.Listener { initRecyclerView(abaLinksList) },
-                Response.ErrorListener {
-                    //System.out.println("****** Error response=" + error.toString());
-                })
-
-        requestQueue.add(request)
-    }*/
-
-    public fun loadEditActivity() {
-        val intent = Intent(this, EditActivity::class.java)
-        startActivity(intent)
     }
 
     // Supresses warning about the class property
