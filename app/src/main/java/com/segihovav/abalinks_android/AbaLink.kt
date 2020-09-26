@@ -4,14 +4,14 @@ import android.os.Parcel
 import android.os.Parcelable
 import java.util.ArrayList
 
-data class AbaLink(var ID: Int, var Name: String?, var URL: String?, var TypeID: Int): Parcelable {
+data class AbaLink(var ID: Int, var Name: String?, var URL: String?, var TypeID: Int) { //: Parcelable {
     var _ID: Int = 0
     var _Name: String = ""
     var _URL: String =""
     var _TypeID: Int = 0
     var _abaLinksTypes: MutableList<AbaLinkType> = ArrayList()
 
-    constructor(parcel: Parcel) : this(
+    /*constructor(parcel: String?) : this(
             parcel.readInt(),
             parcel.readString(),
             parcel.readString(),
@@ -20,15 +20,10 @@ data class AbaLink(var ID: Int, var Name: String?, var URL: String?, var TypeID:
         _Name = parcel.readString().toString()
         _URL = parcel.readString().toString()
         _TypeID = parcel.readInt()
-    }
-
-    // This is here as a helper function so I can pass the link types along with the episode so I don't have to fetch the data in different activities
-    // and can pass it along from one intent to another
-    /*public fun setLinktypes(_abaLinksTypes: MutableList<AbaLinkType>) {
-        this@AbaLinks._abaLinksTypes =_abaLinksTypes
     }*/
+
     //return hashcode of object
-    override fun describeContents(): Int {
+    /*override fun describeContents(): Int {
         return hashCode()
     }
 
@@ -39,7 +34,7 @@ data class AbaLink(var ID: Int, var Name: String?, var URL: String?, var TypeID:
         dest.writeString(Name)
         dest.writeString(URL)
         dest.writeInt(TypeID)
-    }
+    }*/
 
     //constructor used for parcel
     fun Property(parcel: Parcel?) {
@@ -50,7 +45,7 @@ data class AbaLink(var ID: Int, var Name: String?, var URL: String?, var TypeID:
         TypeID=parcel.readInt()
     }
 
-    companion object CREATOR : Parcelable.Creator<AbaLink> {
+    /*companion object CREATOR : Parcelable.Creator<AbaLink> {
         override fun createFromParcel(parcel: Parcel): AbaLink {
             return AbaLink(parcel)
         }
@@ -58,12 +53,12 @@ data class AbaLink(var ID: Int, var Name: String?, var URL: String?, var TypeID:
         override fun newArray(size: Int): Array<AbaLink?> {
             return arrayOfNulls(size)
         }
-    }
+    }*/
 }
 
-data class AbaLinkType(var ID: Int, var Name: String?): Parcelable {
+data class AbaLinkType(var ID: Int, var Name: String? = ""): Parcelable {
     var _ID: Int = 0
-    var _Name: String = ""
+    lateinit var _Name: String
 
     constructor(parcel: Parcel) : this(
             parcel.readInt(),

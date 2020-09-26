@@ -21,6 +21,18 @@
           app:layout_constraintTop_toTopOf="parent"
       />
 
+    <ImageView
+        android:id="@+id/deleteLink"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="350dp"
+        android:clickable="true"
+        android:focusable = "false"
+        android:onClick="deleteLinkClick"
+        android:src="@drawable/delete" />
+
      <TextView
           android:id="@+id/NameLabel"
           android:layout_width="wrap_content"
@@ -90,7 +102,7 @@
     android:id="@+id/TypeID"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-      android:layout_marginStart="70dp"
+    android:layout_marginStart="70dp"
     android:layout_marginTop="56dp"
     android:background="@android:drawable/btn_dropdown"
     android:spinnerMode="dropdown"

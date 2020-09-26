@@ -35,7 +35,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name="com.segihovav.abalinks_android.EditActivity"
-            android:label="editactivity"
+            android:label=""
             android:theme="@style/AppTheme.NoActionBar" />
     </application>
 </manifest>

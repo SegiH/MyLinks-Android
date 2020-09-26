@@ -57,7 +57,6 @@ internal class SwipeController(
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
             if (buttonShowedState != ButtonsState.GONE) {
                 if (buttonShowedState == ButtonsState.LEFT_VISIBLE) dX = max(dX, buttonWidth)
-                //if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) dX = min(dX, -buttonWidth)
 
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             } else {
@@ -68,8 +67,6 @@ internal class SwipeController(
         if (buttonShowedState == ButtonsState.GONE) {
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
         }
-
-        //this.currentItemViewHolder = viewHolder;
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -77,9 +74,6 @@ internal class SwipeController(
         recyclerView.setOnTouchListener { _, event ->
             swipeBack = event.action == MotionEvent.ACTION_CANCEL || event.action == MotionEvent.ACTION_UP
             if (swipeBack) {
-                /*if (dX < -buttonWidth) {
-                    buttonShowedState = ButtonsState.RIGHT_VISIBLE
-                } else*/
                 if (dX > buttonWidth) {
                     buttonShowedState = ButtonsState.LEFT_VISIBLE
                 }
@@ -114,9 +108,7 @@ internal class SwipeController(
                 if (buttonsActions != null && buttonInstance != null && buttonInstance!!.contains(event.x, event.y)) {
                     if (buttonShowedState == ButtonsState.LEFT_VISIBLE) {
                         mainActivity?.let { buttonsActions.onLeftClicked(abaLinksList, viewHolder.adapterPosition, it,linkTypes) }
-                    } /*else if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
-                        buttonsActions.onRightClicked(abaLinksList, viewHolder.adapterPosition)
-                    }*/
+                    }
                 }
 
                 buttonShowedState = ButtonsState.GONE
@@ -171,9 +163,7 @@ internal class SwipeController(
 
         if (buttonShowedState == ButtonsState.LEFT_VISIBLE) {
             buttonInstance = leftButton
-        } /*else if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
-            buttonInstance = rightButton
-        }*/
+        }
     }
 
     private fun drawText(text: String, c: Canvas, button: RectF, p: Paint, y: Int) {
@@ -188,7 +178,6 @@ internal class SwipeController(
 
         //val editBitmap = BitmapFactory.decodeResource(null, R.drawable.edit)
         //c.drawBitmap(editBitmap,0,0,p);
-
     }
 
     companion object {

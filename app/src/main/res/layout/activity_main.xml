@@ -1,35 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/relativeLayout"
-    tools:context="com.segihovav.abalinks_android.MainActivity">
+<androidx.constraintlayout.widget.ConstraintLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     xmlns:tools="http://schemas.android.com/tools"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
+     android:id="@+id/relativeLayout"
+     tools:context="com.segihovav.abalinks_android.MainActivity">
 
-  <EditText
-    android:id="@+id/searchView"
-    android:layout_width="match_parent"
-    android:layout_height="50dp"
-    android:layout_marginBottom="20dp"
-    android:autofillHints="Search"
-    android:hint="@string/Search"
-    android:inputType="text"
-    android:visibility="gone"
-    android:text="" />
+    <EditText
+         android:id="@+id/searchView"
+         android:layout_width="match_parent"
+         android:layout_height="50dp"
+         android:autofillHints="Search"
+         android:hint="@string/Search"
+         android:inputType="text"
+         android:visibility="gone"
+         app:layout_constraintLeft_toLeftOf="parent"
+         app:layout_constraintTop_toTopOf="parent"
+         android:text="" />
 
-      <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+    <Spinner
+         android:id="@+id/TypeIDSpinner"
+         android:layout_width="fill_parent"
+         android:layout_height="wrap_content"
+         android:background="@android:drawable/btn_dropdown"
+         android:visibility="gone"
+         app:layout_constraintLeft_toLeftOf="parent"
+         app:layout_constraintTop_toBottomOf="@+id/searchView"
+         android:spinnerMode="dropdown"
+    />
 
-      <androidx.recyclerview.widget.RecyclerView
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+         android:id="@+id/swipe_container"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/episodeList"
         android:layout_width="match_parent"
         android:layout_height="20dp"
-        android:clipToPadding="false"
+        android:clipToPadding="true"
         android:orientation="horizontal"
         android:overScrollMode="never"
         app:fastScrollEnabled="true"
@@ -39,4 +51,4 @@
         app:fastScrollVerticalTrackDrawable="@drawable/line_drawable"
         android:scrollbars="vertical" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

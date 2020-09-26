@@ -12,8 +12,15 @@ abstract class SwipeControllerActions {
         //mainActivity.intent = = Intent(this, EditActivity::class.java)
         val intent = Intent(mainActivity, EditActivity::class.java)
 
-        intent.putExtra("com.segihovav.abalinks_android.Link",link[position])
-        intent.putExtra("com.segihovav.abalinks_android.LinkTypes",linkTypes)
+        // This throws a fatal parcelable error
+        //intent.putExtra("com.segihovav.abalinks_android.Link",link[position])
+        //intent.putExtra("com.segihovav.abalinks_android.LinkTypes",linkTypes)
+
+        // If you don't cast INT to string, Kotlin throw a NULL pointer exception
+        intent.putExtra("com.segihovav.abalinks_android.LinkID",link[position].ID.toString())
+        intent.putExtra("com.segihovav.abalinks_android.LinkName",link[position].Name)
+        intent.putExtra("com.segihovav.abalinks_android.LinkURL",link[position].URL)
+        intent.putExtra("com.segihovav.abalinks_android.LinkTypeID",link[position].TypeID.toString())
 
         var counter=0
 
