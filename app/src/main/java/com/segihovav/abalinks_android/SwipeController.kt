@@ -15,10 +15,10 @@ internal enum class ButtonsState {
 }
 
 internal class SwipeController(
-    private val buttonsActions: SwipeControllerActions?, private var abaLinksList: List<AbaLink>) : ItemTouchHelper.Callback() {
+    private val buttonsActions: SwipeControllerActions, private var abaLinksList: List<AbaLink>) : ItemTouchHelper.Callback() {
     private var swipeBack = false
     private var buttonShowedState = ButtonsState.GONE
-    private var buttonInstance: RectF? = null
+    private lateinit var buttonInstance: RectF
     private var mainActivity: AppCompatActivity? = null;
     private var linkTypes: ArrayList<AbaLinkType> = ArrayList()
 
@@ -105,7 +105,7 @@ internal class SwipeController(
                 recyclerView.setOnTouchListener { _, _ -> false }
                 setItemsClickable(recyclerView, true)
                 //swipeBack = false
-                if (buttonsActions != null && buttonInstance != null && buttonInstance!!.contains(event.x, event.y)) {
+                if (buttonsActions != null && buttonInstance != null && buttonInstance.contains(event.x, event.y)) {
                     if (buttonShowedState == ButtonsState.LEFT_VISIBLE) {
                         mainActivity?.let { buttonsActions.onLeftClicked(abaLinksList, viewHolder.adapterPosition, it,linkTypes) }
                     }
@@ -159,7 +159,7 @@ internal class SwipeController(
         c.drawRoundRect(rightButton, corners, corners, p)
         drawText("Delete",c, rightButton, p, 0)*/
 
-        buttonInstance = null
+        //buttonInstance = null
 
         if (buttonShowedState == ButtonsState.LEFT_VISIBLE) {
             buttonInstance = leftButton

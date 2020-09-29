@@ -11,35 +11,10 @@ data class AbaLink(var ID: Int, var Name: String?, var URL: String?, var TypeID:
     var _TypeID: Int = 0
     var _abaLinksTypes: MutableList<AbaLinkType> = ArrayList()
 
-    /*constructor(parcel: String?) : this(
-            parcel.readInt(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readInt()) {
-        _ID = parcel.readInt()
-        _Name = parcel.readString().toString()
-        _URL = parcel.readString().toString()
-        _TypeID = parcel.readInt()
-    }*/
-
-    //return hashcode of object
-    /*override fun describeContents(): Int {
-        return hashCode()
-    }
-
-    //write object values to parcel for storage
-    override fun writeToParcel(dest: Parcel?, flags: Int) {
-        //write all properties to the parcle
-        dest!!.writeInt(ID)
-        dest.writeString(Name)
-        dest.writeString(URL)
-        dest.writeInt(TypeID)
-    }*/
-
     //constructor used for parcel
-    fun Property(parcel: Parcel?) {
+    fun Property(parcel: Parcel) {
         //read and set saved values from parcel
-        ID=parcel!!.readInt()
+        ID=parcel.readInt()
         Name=parcel.readString().toString()
         URL=parcel.readString().toString()
         TypeID=parcel.readInt()
@@ -77,9 +52,9 @@ data class AbaLinkType(var ID: Int, var Name: String? = ""): Parcelable {
     }
 
     //constructor used for parcel
-    fun AbaLinkType(parcel: Parcel?) {
+    fun AbaLinkType(parcel: Parcel) {
         //read and set saved values from parcel
-        ID=parcel!!.readInt()
+        ID=parcel.readInt()
         Name=parcel.readString().toString()
     }
 

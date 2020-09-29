@@ -27,8 +27,8 @@ class SettingsActivity : AppCompatActivity() {
         darkModeCheckbox = findViewById(R.id.switchDarkMode)
         abaLinksURL = findViewById(R.id.URL)
 
-        if (sharedPreferences.getString("AbaLinksURL", "") != "" && abaLinksURL.editText != null) {
-            abaLinksURL.editText!!.setText(sharedPreferences.getString("AbaLinksURL", ""))
+        if (sharedPreferences.getString("AbaLinksURL", "") != "") {
+            abaLinksURL.editText?.setText(sharedPreferences.getString("AbaLinksURL", ""))
         }
 
         darkModeCheckbox.isChecked = sharedPreferences.getBoolean("DarkThemeOn", false)
@@ -45,12 +45,12 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     fun saveClick(v: View?) {
-        if (abaLinksURL.editText != null && abaLinksURL.editText!!.text != null && abaLinksURL.editText!!.text.toString() == "") {
+        if (abaLinksURL.editText != null && abaLinksURL.editText?.text != null && abaLinksURL.editText?.text.toString() == "") {
             Toast.makeText(applicationContext, "Please enter the URL", Toast.LENGTH_LONG).show()
             return
         }
         val editor = sharedPreferences.edit()
-        editor.putString("AbaLinksURL", abaLinksURL.editText!!.text.toString())
+        editor.putString("AbaLinksURL", abaLinksURL.editText?.text.toString())
         editor.putBoolean("DarkThemeOn", darkModeCheckbox.isChecked)
         editor.apply()
         if (darkModeToggled) finishAffinity()

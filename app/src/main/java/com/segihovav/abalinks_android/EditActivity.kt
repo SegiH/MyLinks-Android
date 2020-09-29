@@ -17,18 +17,18 @@ import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONArray
 import org.json.JSONException
 import java.util.*
-import kotlin.properties.Delegates
 
 
 class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
      private lateinit var sharedPreferences: SharedPreferences
      private val darkMode = R.style.Theme_AppCompat_DayNight
      private val lightMode = R.style.ThemeOverlay_MaterialComponents
-     private lateinit var link: AbaLink
+     //private lateinit var link: AbaLink
      private val abaLinksTypes: ArrayList<AbaLinkType> = ArrayList()
      private val abaLinksTypeNames: ArrayList<String> = ArrayList()
      private var abaLinksURL: String? = null
      private var isAdding: Boolean = false
+     private var ID: Int = 0
      private lateinit var Name: TextInputLayout
      private lateinit var URL: TextInputLayout
      private lateinit var typeIDSpinner: Spinner
@@ -41,7 +41,12 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           super.onCreate(savedInstanceState)
           setContentView(R.layout.editactivity)
 
-          abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != "") sharedPreferences.getString("AbaLinksURL", "") + (if (!sharedPreferences.getString("AbaLinksURL", "")!!.endsWith("/")) "/" else "") else ""
+          abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != null) sharedPreferences.getString("AbaLinksURL", "") else ""
+
+          if (abaLinksURL != null && !abaLinksURL?.endsWith("/")!!)
+               abaLinksURL+="/"
+
+          // abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != "") sharedPreferences.getString("AbaLinksURL", "") + (if (sharedPreferences != null && sharedPreferences.getString("AbaLinksURL", "") != null && !sharedPreferences?.getString("AbaLinksURL", "")?.endsWith("/")) "/" else "") else ""
 
           val titleBar=findViewById<TextView>(R.id.TitleBar)
 
@@ -77,11 +82,11 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                while (extras.getString("com.segihovav.abalinks_android.LinkTypeID" + counter) != null) {
                     var IDKey="com.segihovav.abalinks_android.LinkTypeID" + counter
 
-                    val LinkTypeID = if (extras.getString(IDKey) != null && !extras.getString(IDKey).equals("")) extras.getString(IDKey)!!.toInt() else 0
+                    ID = if (extras.getString(IDKey) != null && !extras.getString(IDKey).equals("")) extras.getString(IDKey)!!.toInt() else 0
 
                     var LinkTypeName = extras.getString("com.segihovav.abalinks_android.LinkTypeName" + counter)
 
-                    abaLinksTypes.add(AbaLinkType(LinkTypeID, LinkTypeName))
+                    abaLinksTypes.add(AbaLinkType(ID, LinkTypeName))
 
                     if (isAdding)
                         abaLinksTypeNames.add("")
@@ -127,13 +132,17 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
      private fun alert(message: String, closeApp: Boolean,confirmDialog: Boolean = false  ) {
           // Display dialog
           val builder = AlertDialog.Builder(this)
-          builder.setMessage(message)
-               .setCancelable(confirmDialog)
-               .setPositiveButton("OK") { _, _ ->
-                    // Fix me only do this when deleting
+
+          builder.setMessage(message).setCancelable(confirmDialog)
+
+          // When deleting, we need  yes/no cancelable buttons
+          if (confirmDialog) {
+               builder.setNegativeButton("Cancel") { _, _ -> if (closeApp) finish() }
+
+               builder.setPositiveButton("OK") { _, _ ->
                     val getLinkDataEndpoint = "LinkData.php?task=deleteRow"
 
-                    val params="&LinkID=" + link.ID
+                    val params= "&LinkID=$ID"
 
                     processData(getLinkDataEndpoint, params)
 
@@ -143,40 +152,43 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
                     finish()
                }
-
-          if (confirmDialog)
-               builder.setNegativeButton("Cancel") { _, _ -> if (closeApp) finish() }
+          } else {
+              builder.setPositiveButton("OK") { _, _ -> if (closeApp) finish() }
+          }
 
           val alert = builder.create()
 
           alert.show()
      }
 
-     fun deleteLinkClick(v: View) {
-          alert("Are you sure that you want to delete this link ?",false,true)
+     fun deleteLinkClick() {
+          alert("Are you sure that you want to delete this link ?",closeApp = false,confirmDialog = true)
      }
 
-     fun goBackClick(v: View?) {
+     fun goBackClick() {
           val intent = Intent(this, MainActivity::class.java)
           startActivity(intent)
      }
 
-     fun saveClick(v: View?) {
-          var getLinkDataEndpoint: String = ""
-          var params: String = ""
+     fun saveClick() {
+          var getLinkDataEndpoint: String
+          var params: String
+
+          val name=if (Name.editText?.text != null) java.net.URLEncoder.encode(Name.editText?.text.toString()) else ""
+          val url=if (URL.editText?.text != null) java.net.URLEncoder.encode(URL.editText?.text.toString()) else ""
 
           // Validate all fields
-          if (Name.editText!!.text.isEmpty()) {
+          if (name != null && name.isEmpty()) {
               alert("Please enter the name", false)
               return
           }
 
-          if (URL.editText!!.text.isEmpty()) {
+          if (url != null && url.isEmpty()) {
                alert("Please enter the URL", false)
                return
           }
 
-          if (!URL.editText!!.text.contains("http://") && !URL.editText!!.text.contains("https://")) {
+          if (url != null && !url.contains("http://") && !url.contains("https://")) {
                alert("The URL that you entered is not valid", false)
                return
           }
@@ -190,27 +202,25 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           if (!isAdding) {
                getLinkDataEndpoint = "LinkData.php?task=updateRow"
 
-               params="&rowID=" + link!!.ID + "&columnName=Name&columnValue=" + Name.editText!!.text
+               params="&rowID=" + this.ID + "&columnName=Name&columnValue=" + name
                processData(getLinkDataEndpoint, params)
 
-               params="&rowID=" + link!!.ID + "&columnName=URL&columnValue=" + URL.editText!!.text
+               params="&rowID=" + this.ID + "&columnName=URL&columnValue=" + url
                processData(getLinkDataEndpoint, params)
-
-               var TypeID:Int =0
 
                for (i in abaLinksTypes.indices) {
-                    if (abaLinksTypes[i].Name!!.equals(typeIDSpinner.selectedItem)) {
-                         TypeID=abaLinksTypes[i].ID
+                    val linkTypeName= if (abaLinksTypes[i].Name != null) abaLinksTypes[i].Name else ""
+
+                    if (linkTypeName == typeIDSpinner.selectedItem) {
+                         params="&rowID=" + this.ID + "&columnName=TypeID&columnValue=" + abaLinksTypes[i].ID
+                         processData(getLinkDataEndpoint, params)
                     }
                }
 
-               params="&rowID=" + link!!.ID + "&columnName=TypeID&columnValue=" + TypeID
-
-               processData(getLinkDataEndpoint, params)
           } else { // Save new item
                getLinkDataEndpoint = "LinkData.php?task=insertRow"
 
-               params="&Name=" +  java.net.URLEncoder.encode(Name.editText!!.text.toString(), "utf-8") + "&URL=" + java.net.URLEncoder.encode(URL.editText!!.text.toString(), "utf-8") + "&Type=" + typeIDSpinner.selectedItem
+               params="&Name=" +  name + "&URL=" + url + "&Type=" + typeIDSpinner.selectedItem
 
                processData(getLinkDataEndpoint, params)
           }
@@ -226,16 +236,9 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                   Request.Method.GET,
                   abaLinksURL + getLinkDataEndpoint + params,
                   null,
-                  Response.Listener { response ->
+                  Response.Listener { _ ->
                        //if (getLinkDataEndpoint.contains("deleteRow"))
                        //     return@Listener
-
-                       var jsonarray: JSONArray? = null
-                       try {
-                            jsonarray = JSONArray(response.toString())
-                       } catch (e: JSONException) {
-                            e.printStackTrace()
-                       }
                   },
                   Response.ErrorListener {
                        //System.out.println("****** Error response=" + error.toString());

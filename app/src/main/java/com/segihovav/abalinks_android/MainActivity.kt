@@ -46,6 +46,7 @@ import kotlin.collections.ArrayList
 // DONE - add error chcking and close app if a fatal error occurs
 // DONE - implement deleting
 
+// when saving, creates duplicate
 // Replace !! with ? in all classes
 // add search
 // change app icon
@@ -116,7 +117,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
 
                     for (i in abaLinksList.indices) {
                         // If the search term is contained in the name or URL
-                        if (abaLinksList != null && abaLinksList[i] != null && abaLinksList[i].Name!= null && abaLinksList[i].Name?.toLowerCase(Locale.ROOT)!!.contains(s.toString().toLowerCase(Locale.ROOT)) || abaLinksList[i].URL.toString().contains(s)) {
+                        if (abaLinksList != null && abaLinksList[i] != null && abaLinksList[i].Name!= null && abaLinksList[i].Name?.toLowerCase(Locale.ROOT) != null && abaLinksList[i].Name?.toLowerCase(Locale.ROOT)?.contains(s.toString().toLowerCase(Locale.ROOT))!! || abaLinksList[i].URL.toString().contains(s)) {
                             abaLinksListFiltered.add(abaLinksList[i])
                         }
                     }
