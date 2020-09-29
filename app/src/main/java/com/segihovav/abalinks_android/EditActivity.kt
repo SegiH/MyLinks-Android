@@ -23,10 +23,9 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
      private lateinit var sharedPreferences: SharedPreferences
      private val darkMode = R.style.Theme_AppCompat_DayNight
      private val lightMode = R.style.ThemeOverlay_MaterialComponents
-     //private lateinit var link: AbaLink
      private val abaLinksTypes: ArrayList<AbaLinkType> = ArrayList()
      private val abaLinksTypeNames: ArrayList<String> = ArrayList()
-     private var abaLinksURL: String? = null
+     private lateinit var abaLinksURL: String
      private var isAdding: Boolean = false
      private var ID: Int = 0
      private lateinit var Name: TextInputLayout
@@ -41,12 +40,10 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           super.onCreate(savedInstanceState)
           setContentView(R.layout.editactivity)
 
-          abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != null) sharedPreferences.getString("AbaLinksURL", "") else ""
+          abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != null) sharedPreferences.getString("AbaLinksURL", "").toString() else ""
 
-          if (abaLinksURL != null && !abaLinksURL?.endsWith("/")!!)
+          if (abaLinksURL != "" && !abaLinksURL.endsWith("/"))
                abaLinksURL+="/"
-
-          // abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != "") sharedPreferences.getString("AbaLinksURL", "") + (if (sharedPreferences != null && sharedPreferences.getString("AbaLinksURL", "") != null && !sharedPreferences?.getString("AbaLinksURL", "")?.endsWith("/")) "/" else "") else ""
 
           val titleBar=findViewById<TextView>(R.id.TitleBar)
 
@@ -82,16 +79,16 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                while (extras.getString("com.segihovav.abalinks_android.LinkTypeID" + counter) != null) {
                     var IDKey="com.segihovav.abalinks_android.LinkTypeID" + counter
 
-                    ID = if (extras.getString(IDKey) != null && !extras.getString(IDKey).equals("")) extras.getString(IDKey)!!.toInt() else 0
+                    var LinktypeID = if (extras.getString(IDKey) != null && extras.getString(IDKey) != "") extras.getInt(IDKey) else 0
 
                     var LinkTypeName = extras.getString("com.segihovav.abalinks_android.LinkTypeName" + counter)
 
-                    abaLinksTypes.add(AbaLinkType(ID, LinkTypeName))
+                    abaLinksTypes.add(AbaLinkType(LinktypeID, LinkTypeName))
 
                     if (isAdding)
                         abaLinksTypeNames.add("")
 
-                    if (LinkTypeName != null && (!LinkTypeName.equals("All")))
+                    if (LinkTypeName != null && LinkTypeName != "All")
                          abaLinksTypeNames.add(LinkTypeName)
 
                     counter++
@@ -104,7 +101,12 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                typeIDSpinner.setAdapter(dataAdapter);
 
                if (!isAdding) {
-                   var link=AbaLink(extras.getString("com.segihovav.abalinks_android.LinkID")!!.toInt(), extras.getString("com.segihovav.abalinks_android.LinkName"),extras.getString("com.segihovav.abalinks_android.LinkURL"), extras.getString("com.segihovav.abalinks_android.LinkTypeID")!!.toInt())
+                   val IDStr =  extras.getString("com.segihovav.abalinks_android.LinkID")
+
+                    if (IDStr != null && IDStr != "")
+                         ID=IDStr.toInt()
+
+                   var link=AbaLink(extras.getInt("com.segihovav.abalinks_android.LinkID"), extras.getString("com.segihovav.abalinks_android.LinkName"),extras.getString("com.segihovav.abalinks_android.LinkURL"), extras.getInt("com.segihovav.abalinks_android.LinkTypeID"))
 
                    abaLinksTypes.clear()
 
@@ -161,21 +163,21 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           alert.show()
      }
 
-     fun deleteLinkClick() {
+     fun deleteLinkClick(v: View) {
           alert("Are you sure that you want to delete this link ?",closeApp = false,confirmDialog = true)
      }
 
-     fun goBackClick() {
+     fun goBackClick(v: View) {
           val intent = Intent(this, MainActivity::class.java)
           startActivity(intent)
      }
 
-     fun saveClick() {
+     fun saveClick(v: View) {
           var getLinkDataEndpoint: String
           var params: String
 
-          val name=if (Name.editText?.text != null) java.net.URLEncoder.encode(Name.editText?.text.toString()) else ""
-          val url=if (URL.editText?.text != null) java.net.URLEncoder.encode(URL.editText?.text.toString()) else ""
+          val name=if (Name.editText?.text != null) Name.editText?.text else ""
+          val url=if (URL.editText?.text != null) URL.editText?.text else ""
 
           // Validate all fields
           if (name != null && name.isEmpty()) {
@@ -188,7 +190,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                return
           }
 
-          if (url != null && !url.contains("http://") && !url.contains("https://")) {
+          if (url != null && !url.startsWith("http://") && !url.startsWith("https://")) {
                alert("The URL that you entered is not valid", false)
                return
           }
@@ -220,7 +222,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           } else { // Save new item
                getLinkDataEndpoint = "LinkData.php?task=insertRow"
 
-               params="&Name=" +  name + "&URL=" + url + "&Type=" + typeIDSpinner.selectedItem
+               params="&Name=" + name + "&URL=" + url + "&Type=" + typeIDSpinner.selectedItem
 
                processData(getLinkDataEndpoint, params)
           }
@@ -243,7 +245,6 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                   Response.ErrorListener {
                        //System.out.println("****** Error response=" + error.toString());
                        //alert("An error occurred " + if(!isAdding) "saving" else "adding" + " the link with the error ", false)
-                       // if (sharedPreferences!!.getString("AbaLinksURL", "") != "") sharedPreferences!!.getString("AbaLinksURL", "")
                   })
 
           requestQueue.add(request)

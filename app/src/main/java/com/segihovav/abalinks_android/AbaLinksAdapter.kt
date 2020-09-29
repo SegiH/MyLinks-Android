@@ -27,7 +27,7 @@ class AbaLinksAdapter(private val names: List<String>,private val abaLinksTypeNa
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         // Set displayed list item text
-        if (names != null && names[position] != null && (names[position].contains("http") || names[position].contains("https"))) {
+        if (names[position].contains("http") || names[position].contains("https")) {
             holder.name.text = Html.fromHtml(names[position], HtmlCompat.FROM_HTML_MODE_LEGACY)
             holder.name.movementMethod = LinkMovementMethod.getInstance()
 
@@ -35,14 +35,14 @@ class AbaLinksAdapter(private val names: List<String>,private val abaLinksTypeNa
 
             if (sharedPreferences.getBoolean("DarkThemeOn", false)) holder.name.setLinkTextColor(Color.rgb(255, 255, 255)) else holder.name.setLinkTextColor(Color.rgb(0, 0, 0))
         } else {
-            if (names != null && names[position] != null)
             holder.name.text = names[position];
         }
 
-        holder.typeInfo.text=abaLinksTypeNames[position]
+        if (position<abaLinksTypeNames.size)
+             holder.typeInfo.text=abaLinksTypeNames[position]
     }
 
     override fun getItemCount(): Int {
-        return names?.size ?: 0
+        return names.size
     }
 }

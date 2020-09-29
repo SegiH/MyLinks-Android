@@ -13,7 +13,9 @@ import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup.MarginLayoutParams
+import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
@@ -24,7 +26,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
-import com.android.volley.BuildConfig
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
@@ -45,20 +46,23 @@ import kotlin.collections.ArrayList
 // DONE - Implement adding
 // DONE - add error chcking and close app if a fatal error occurs
 // DONE - implement deleting
+// DONE - Replace double exclamation marks with ? in all classes
+// DONE - add search capability
+// DONE - make sure type dropdown is shown when searching
+// DONE - pull to reload doesnt factor search filters
+// DONE - replace all instances of .equals where possible
+// DONE - when saving, creates duplicate fixed
+// DONE - change app icon
 
-// when saving, creates duplicate
-// Replace !! with ? in all classes
-// add search
-// change app icon
-
-class MainActivity : AppCompatActivity(), OnRefreshListener {
+class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemSelectedListener {
     private lateinit var abaLinksURL: String
     private val abaLinksList: MutableList<AbaLink> = ArrayList()
     private var abaLinksTypes: ArrayList<AbaLinkType> = ArrayList()
+    private val abaLinksTypeNames: java.util.ArrayList<String> = java.util.ArrayList()
     private lateinit var searchView: EditText
     private lateinit var swipeController: SwipeController
     private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var typeIDSpinner: Spinner
+    private lateinit var searchTypeIDSpinner: Spinner
     private lateinit var episodeListView: RecyclerView
 
     private val darkMode = R.style.Theme_AppCompat_DayNight
@@ -87,11 +91,14 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
         // init swipe listener
         mSwipeRefreshLayout.setOnRefreshListener(this)
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary, android.R.color.holo_green_dark, android.R.color.holo_orange_dark, android.R.color.holo_blue_dark)
-        mSwipeRefreshLayout.setOnRefreshListener { loadJSONData() }
+        mSwipeRefreshLayout.setOnRefreshListener { loadJSONData(true); searchView.setText(searchView.text) }
 
         episodeListView = findViewById(R.id.episodeList)
 
-        abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != "") sharedPreferences.getString("AbaLinksURL", "") + (if (!sharedPreferences.getString("AbaLinksURL", "")!!.endsWith("/")) "/" else "") else ""
+        abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != null) sharedPreferences.getString("AbaLinksURL", "").toString() else ""
+
+        if (abaLinksURL != "" && !abaLinksURL.endsWith("/"))
+            abaLinksURL+="/"
 
         if (abaLinksURL == "") {
             alert("Please set the URL to your instance of AbaLinks in Settings", false)
@@ -100,10 +107,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
 
         searchView = findViewById(R.id.searchView)
 
-        typeIDSpinner = findViewById<Spinner>(R.id.TypeIDSpinner)
+        searchTypeIDSpinner = findViewById<Spinner>(R.id.searchTypeIDSpinner)
 
-        // Hide by default
-        searchViewIsVisible(false)
+        searchTypeIDSpinner.setOnItemSelectedListener(this)
 
         // Set the searchView icon based on the theme
         if (sharedPreferences.getBoolean("DarkThemeOn", false)) searchView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.search_white, 0, 0, 0) else searchView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.search_black, 0, 0, 0)
@@ -117,8 +123,30 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
 
                     for (i in abaLinksList.indices) {
                         // If the search term is contained in the name or URL
-                        if (abaLinksList != null && abaLinksList[i] != null && abaLinksList[i].Name!= null && abaLinksList[i].Name?.toLowerCase(Locale.ROOT) != null && abaLinksList[i].Name?.toLowerCase(Locale.ROOT)?.contains(s.toString().toLowerCase(Locale.ROOT))!! || abaLinksList[i].URL.toString().contains(s)) {
-                            abaLinksListFiltered.add(abaLinksList[i])
+                        val itemName = abaLinksList[i].Name?.toLowerCase(Locale.ROOT)
+                        val itemURL = abaLinksList[i].URL
+                        val itemTypeID = abaLinksList[i].TypeID
+
+                        val searchTerm = s.toString().toLowerCase(Locale.ROOT)
+                        var searchTypeID = -1
+
+                        for (j in abaLinksTypes.indices) {
+                            if (abaLinksTypes[j].Name == searchTypeIDSpinner.selectedItem)
+                                searchTypeID=abaLinksTypes[j].ID
+                        }
+
+                        //if (((itemName != null && searchTerm != "" && itemName.contains(searchTerm)) || searchTerm == "") || (itemURL != null && searchTerm!="" && itemURL.contains(s)) || (searchTypeID == -1 || (searchTypeID != -1 && searchTypeID == itemTypeID))) {
+                        when(searchTerm) {
+                            "" -> if ((searchTypeID == -1 || searchTypeID == 6) || (searchTypeID != -1 && searchTypeID == itemTypeID)) {
+                                abaLinksListFiltered.add(abaLinksList[i])
+                            }
+                            else -> {
+                                if (itemName != null && itemName.contains(searchTerm) && (searchTypeID == -1 || (searchTypeID != -1 && searchTypeID == itemTypeID) )) {
+                                    abaLinksListFiltered.add(abaLinksList[i])
+                                } else if (itemURL != null && itemURL.contains(s) && (searchTypeID == -1 || (searchTypeID != -1 && searchTypeID == itemTypeID) )) {
+                                    abaLinksListFiltered.add(abaLinksList[i])
+                                }
+                            }
                         }
                     }
 
@@ -137,7 +165,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
         val searchMenuItem = menu.findItem(R.id.action_search)
 
         // Search search menu icon based on the current theme
-        searchMenuItem.setIcon(if (sharedPreferences.getBoolean("DarkThemeOn", false)) R.drawable.search_white else R.drawable.search_black)
+        //searchMenuItem.setIcon(if (sharedPreferences.getBoolean("DarkThemeOn", false)) R.drawable.search_white else R.drawable.search_black)
+        searchMenuItem.setIcon(R.drawable.search_white)
         return true
     }
 
@@ -147,11 +176,15 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
        if (episodeListView.adapter != null) episodeListView.adapter?.notifyDataSetChanged()
     }
 
+    override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+        // Set text to itself if the user selects a type filter to trigger the searchView.addTextChangedListener event
+        searchView.setText(searchView.text)
+    }
+
+    override fun onNothingSelected(p0: AdapterView<*>?) { }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
-
-        // Make search view hidden by default. It will be shown if needed
-        //searchViewIsVisible(false)
 
         if (id == R.id.action_settings) { // Settings menu
             val intent = Intent(this, SettingsActivity::class.java)
@@ -173,7 +206,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
 
             startActivity(intent)
         } else if (id == R.id.action_search) {
-            searchViewIsVisible(true)
+            searchViewIsVisible()
         }
 
         return super.onOptionsItemSelected(item)
@@ -184,6 +217,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
     // Fixes the issue that causes the swipe buttons to disappear when leaving the app
     public override fun onResume() {
         super.onResume()
+        // When resuming this activity, hide the search field and search type dropdown
+        if (searchView.visibility == View.VISIBLE)
+            searchViewIsVisible()
 
         loadTypes()
 
@@ -196,7 +232,10 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         // Since onCreate() doesn't get called when returning from another activity, we have to set AbaLinksURL here
-        abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != "") sharedPreferences.getString("AbaLinksURL", "") + (if (sharedPreferences != null && !sharedPreferences.getString("AbaLinksURL", "")!!.endsWith("/")) "/" else "") else ""
+        abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != null) sharedPreferences.getString("AbaLinksURL", "").toString() else ""
+
+        if (abaLinksURL != "" && !abaLinksURL.endsWith("/"))
+            abaLinksURL+="/"
 
         if (abaLinksTypes.size == 0)
              loadTypes()
@@ -204,9 +243,12 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
 
     public override fun onStop() {
         super.onStop()
+    }
 
-        // Hide by default
-        searchViewIsVisible(false)
+    public override fun onDestroy() {
+
+
+         super.onDestroy()
     }
 
     private fun alert(message: String, closeApp: Boolean) {
@@ -232,13 +274,12 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
         abaLinkNames.clear()
 
         for (i in arrayList.indices) {
-            //arrayList[i].Name?.let { abaLinkNames.add(it) };
             abaLinkNames.add("<A HREF='" + arrayList[i].URL + "'>" + arrayList[i].Name + "</A>")
 
             // Type names
             for (j in abaLinksTypes.indices) {
-                if (abaLinksTypes[j].ID==arrayList[i].TypeID && abaLinksTypes[j] != null && abaLinksTypes[j].Name != "") {
-                    abaLinkTypeNames.add(abaLinksTypes[j].Name!!)
+                if (abaLinksTypes[j].ID==arrayList[i].TypeID && abaLinksTypes[j].Name != "") {
+                    abaLinkTypeNames.add(abaLinksTypes[j].Name.toString())
                 }
             }
         }
@@ -273,7 +314,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
         }
     }
 
-    private fun loadJSONData() {
+    private fun loadJSONData(isRefreshing: Boolean = false) {
         val getLinkDataEndpoint = "LinkData.php?task=fetchData"
         val requestQueue: RequestQueue = Volley.newRequestQueue(this)
         val request = JsonArrayRequest(
@@ -291,10 +332,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
                     // This is needed so that when the user pulls to refresh, all previous items are removed  to avoid duplicates
                     abaLinksList.clear()
 
-                    if (BuildConfig.DEBUG && jsonarray == null) {
-                        error("Assertion failed")
-                    }
-
                     for (i in 0 until jsonarray.length()) {
                         try {
                             val jsonobject = jsonarray.getJSONObject(i)
@@ -306,7 +343,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
                         }
                     }
 
-                    initRecyclerView(abaLinksList)
+                    if (!isRefreshing)
+                         initRecyclerView(abaLinksList)
                 },
                 Response.ErrorListener {
                     //System.out.println("****** Error response=" + error.toString());
@@ -331,21 +369,26 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
                          e.printStackTrace()
                      }
 
-                     if (BuildConfig.DEBUG && jsonarray == null) {
-                         error("Assertion failed")
-                     }
-
                      abaLinksTypes.clear()
+                     abaLinksTypeNames.clear()
 
                      for (i in 0 until jsonarray.length()) {
                          try {
                              val jsonobject = jsonarray.getJSONObject(i)
 
                              abaLinksTypes.add(AbaLinkType(jsonobject.getInt("id"), jsonobject.getString("value")))
+
+                             abaLinksTypeNames.add(jsonobject.getString("value"))
                          } catch (e: JSONException) {
                              e.printStackTrace()
                          }
                      }
+
+                     // Creating adapter for spinner
+                     val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, abaLinksTypeNames)
+
+                     // attaching data adapter to spinner
+                     searchTypeIDSpinner.setAdapter(dataAdapter);
 
                      swipeController.setLinkTypes(abaLinksTypes)
 
@@ -357,50 +400,27 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
         requestQueue.add(request)
     }
 
-    // When showing the search EditText, move the entire swipe layout down and then move it back up when hiding the search
-    private fun searchViewIsVisible(isHidden: Boolean) {
+    // Visibility is always toggled
+    public fun searchViewIsVisible() {
         val swipeControl = findViewById<SwipeRefreshLayout>(R.id.swipe_container)
 
-        val marginLayoutParams = swipeControl.layoutParams as MarginLayoutParams
-        marginLayoutParams.setMargins(marginLayoutParams.marginStart, if (isHidden) 130 else 0, marginLayoutParams.marginEnd, marginLayoutParams.bottomMargin)
+        val isHidden=if(searchView.visibility == View.VISIBLE) false else true
 
-        swipeControl.layoutParams = marginLayoutParams
-
-        val spinnerMargin = typeIDSpinner.layoutParams as MarginLayoutParams
-
-        //val episodeListmarginLayoutParams = episodeListView?.layoutParams as MarginLayoutParams
-
-        //val layoutParams: ViewGroup.LayoutParams = episodeListView.getLayoutParams()
-
-        //var params: MarginLayoutParams=episodeListView.layoutParams
-
-        //episodeListView.getLayoutParams().width = 200 params . leftMargin = 100
-        //params.topMargin = 200
-
-        if (isHidden) {
-            //spinnerMargin.setMargins(0,200,0,150)
-            //episodeListmarginLayoutParams.setMargins(0,50,0,0)
-            //episodeListmarginLayoutParams.se .setMargins(0,50,0,0)
-            //episodeListView.layoutParams(params)
-            //episodeListView.setPadding(0, 100, 0, 0)
-        } else {
-            //spinnerMargin.setMargins(0,100,0,0)
-            //episodeListmarginLayoutParams.setMargins(0,50,0,0)
-            //episodeListmarginLayoutParams.setMargins(0,0,0,0)
-            //episodeListView.setPadding(0, 0, 0, 0)
-        }
-
-        //typeIDSpinner.layoutParams=spinnerMargin
-        //episodeListView.layoutParams=episodeListmarginLayoutParams
-
-        searchView = findViewById(R.id.searchView)
         searchView.visibility = if (!isHidden) View.GONE else View.VISIBLE
         searchView.requestFocus()
 
-        typeIDSpinner = findViewById<Spinner>(R.id.TypeIDSpinner)
-        typeIDSpinner.visibility = if (!isHidden) View.GONE else View.VISIBLE
+        searchTypeIDSpinner.visibility = if (!isHidden) View.GONE else View.VISIBLE
 
-        episodeListView.refreshDrawableState()
+        // Set top margin on tthe swipeControl which contains the episode Recyclerview when showing the search field and search type dropdown
+        val params: ViewGroup.MarginLayoutParams = swipeControl.getLayoutParams() as ViewGroup.MarginLayoutParams
+
+        if (isHidden) {
+            params.setMargins(0, 300, 0, 0)
+        } else {
+            params.setMargins(0, 0, 0, 0)
+        }
+
+        swipeControl.layoutParams=params
     }
 
     // Supresses warning about the class property
@@ -409,4 +429,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener {
         @SuppressLint("StaticFieldLeak")
         var context: Context? = null
     }
+}
+
+private fun Spinner.setOnItemSelectedListener() {
+    TODO("Not yet implemented")
 }

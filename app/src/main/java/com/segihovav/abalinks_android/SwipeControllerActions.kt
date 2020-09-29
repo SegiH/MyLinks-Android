@@ -9,7 +9,7 @@ abstract class SwipeControllerActions {
 
     // Edit
     fun onLeftClicked(link: List<AbaLink>, position: Int, mainActivity: AppCompatActivity, linkTypes: ArrayList<AbaLinkType>) {
-        //mainActivity.intent = = Intent(this, EditActivity::class.java)
+        // Hide search field and search type spinner when user clicks on left swipe button
         val intent = Intent(mainActivity, EditActivity::class.java)
 
         // This throws a fatal parcelable error
