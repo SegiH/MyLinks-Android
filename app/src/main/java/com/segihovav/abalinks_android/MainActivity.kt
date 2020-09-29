@@ -36,24 +36,8 @@ import org.json.JSONException
 import java.util.*
 import kotlin.collections.ArrayList
 
-// TO DO/Fix
-// DONE - in edit panel move all fields more to the left
-// DONE - reload data after returning from editactivity
-// DONE - add URL on main list
-// DONE - add additional info below name
-// DONE - remove the text editactivity at the top of the editactivity
-// DONR - Spinner not selecting the right value
-// DONE - Implement adding
-// DONE - add error chcking and close app if a fatal error occurs
-// DONE - implement deleting
-// DONE - Replace double exclamation marks with ? in all classes
-// DONE - add search capability
-// DONE - make sure type dropdown is shown when searching
-// DONE - pull to reload doesnt factor search filters
-// DONE - replace all instances of .equals where possible
-// DONE - when saving, creates duplicate fixed
-// DONE - change app icon
-
+// TO DO
+// See i you can replace edit button with pencil icon
 class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemSelectedListener {
     private lateinit var abaLinksURL: String
     private val abaLinksList: MutableList<AbaLink> = ArrayList()
@@ -64,7 +48,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var searchTypeIDSpinner: Spinner
     private lateinit var episodeListView: RecyclerView
-
     private val darkMode = R.style.Theme_AppCompat_DayNight
     private val lightMode = R.style.ThemeOverlay_MaterialComponents
 
@@ -97,6 +80,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
         abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != null) sharedPreferences.getString("AbaLinksURL", "").toString() else ""
 
+        // Make sure that abaLinksURL always ends in a black slash
         if (abaLinksURL != "" && !abaLinksURL.endsWith("/"))
             abaLinksURL+="/"
 
@@ -110,9 +94,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         searchTypeIDSpinner = findViewById<Spinner>(R.id.searchTypeIDSpinner)
 
         searchTypeIDSpinner.setOnItemSelectedListener(this)
-
-        // Set the searchView icon based on the theme
-        if (sharedPreferences.getBoolean("DarkThemeOn", false)) searchView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.search_white, 0, 0, 0) else searchView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.search_black, 0, 0, 0)
 
         // Search change event
         searchView.addTextChangedListener(object : TextWatcher {
@@ -135,7 +116,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                                 searchTypeID=abaLinksTypes[j].ID
                         }
 
-                        //if (((itemName != null && searchTerm != "" && itemName.contains(searchTerm)) || searchTerm == "") || (itemURL != null && searchTerm!="" && itemURL.contains(s)) || (searchTypeID == -1 || (searchTypeID != -1 && searchTypeID == itemTypeID))) {
                         when(searchTerm) {
                             "" -> if ((searchTypeID == -1 || searchTypeID == 6) || (searchTypeID != -1 && searchTypeID == itemTypeID)) {
                                 abaLinksListFiltered.add(abaLinksList[i])
@@ -245,12 +225,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         super.onStop()
     }
 
-    public override fun onDestroy() {
-
-
-         super.onDestroy()
-    }
-
     private fun alert(message: String, closeApp: Boolean) {
         // Display dialog
         val builder = AlertDialog.Builder(this)
@@ -290,7 +264,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
         layoutManager = LinearLayoutManager(applicationContext)
 
-
         episodeListView.layoutManager = layoutManager
         episodeListView.itemAnimator = DefaultItemAnimator()
 
@@ -329,7 +302,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                         e.printStackTrace()
                     }
 
-                    // This is needed so that when the user pulls to refresh, all previous items are removed  to avoid duplicates
+                    // This is needed so that when the user pulls to refresh, all previous items are removed to avoid duplicates
                     abaLinksList.clear()
 
                     for (i in 0 until jsonarray.length()) {
@@ -401,7 +374,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
     }
 
     // Visibility is always toggled
-    public fun searchViewIsVisible() {
+    fun searchViewIsVisible() {
         val swipeControl = findViewById<SwipeRefreshLayout>(R.id.swipe_container)
 
         val isHidden=if(searchView.visibility == View.VISIBLE) false else true
@@ -429,8 +402,4 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         @SuppressLint("StaticFieldLeak")
         var context: Context? = null
     }
-}
-
-private fun Spinner.setOnItemSelectedListener() {
-    TODO("Not yet implemented")
 }

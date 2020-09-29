@@ -18,7 +18,6 @@ import org.json.JSONArray
 import org.json.JSONException
 import java.util.*
 
-
 class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
      private lateinit var sharedPreferences: SharedPreferences
      private val darkMode = R.style.Theme_AppCompat_DayNight
@@ -125,11 +124,9 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           }
      }
 
-     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-     }
+     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) { }
 
-     override fun onNothingSelected(p0: AdapterView<*>?) {
-     }
+     override fun onNothingSelected(p0: AdapterView<*>?) { }
 
      private fun alert(message: String, closeApp: Boolean,confirmDialog: Boolean = false  ) {
           // Display dialog
