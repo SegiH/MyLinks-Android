@@ -415,10 +415,4 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         @SuppressLint("StaticFieldLeak")
         var context: Context? = null
     }
-
-    fun editLinkClick(view: View,position: Int) {
-     alert("Edit Click")
-    }
-
-    fun editLinkClick(view: View) {}
 }

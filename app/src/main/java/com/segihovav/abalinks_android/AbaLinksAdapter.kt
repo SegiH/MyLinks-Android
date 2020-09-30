@@ -43,10 +43,6 @@ class AbaLinksAdapter(private val names: List<String>,private val abaLinksTypeNa
              holder.typeInfo.text=abaLinksTypeNames[position]
     }
 
-    /*private fun editLinkClick(v: View) {
-        alert("Edit",false)
-    }*/
-
     override fun getItemCount(): Int {
         return names.size
     }
