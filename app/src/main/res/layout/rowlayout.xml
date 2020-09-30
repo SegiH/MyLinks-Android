@@ -1,33 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:focusable="true"
-    android:clickable="true"
-    android:layout_margin="8dp"
-    >
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:focusable="true"
+     android:clickable="true"
+     android:layout_margin="8dp"
+     >
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:focusableInTouchMode="true"
-        android:padding="8dp">
+     <LinearLayout
+          android:orientation="vertical"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:focusableInTouchMode="true"
+          android:padding="8dp">
 
-    <TextView
-        android:id="@+id/name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:textSize="20sp" />
+     <TextView
+          android:id="@+id/name"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_margin="10dp"
+          android:textSize="20sp" />
 
-        <TextView
-            android:id="@+id/linkTypeInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:visibility="visible"/>
+     <TextView
+          android:id="@+id/linkTypeInfo"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textSize="12sp"
+          android:visibility="visible"/>
 
-    </LinearLayout>
+         <!-- <ImageView
+             android:id="@+id/simpleImageView"
+             android:layout_width="fill_parent"
+             android:layout_height="wrap_content"
+             android:paddingStart="300dp"
+             android:clickable="true"
+             android:focusable = "false"
+             android:src="@drawable/edit" /> -->
+
+     </LinearLayout>
 </androidx.cardview.widget.CardView>

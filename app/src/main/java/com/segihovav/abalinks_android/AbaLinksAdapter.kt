@@ -1,5 +1,6 @@
 package com.segihovav.abalinks_android
 
+import android.app.AlertDialog
 import android.graphics.Color
 import android.text.Html
 import android.text.method.LinkMovementMethod
@@ -41,6 +42,10 @@ class AbaLinksAdapter(private val names: List<String>,private val abaLinksTypeNa
         if (position<abaLinksTypeNames.size)
              holder.typeInfo.text=abaLinksTypeNames[position]
     }
+
+    /*private fun editLinkClick(v: View) {
+        alert("Edit",false)
+    }*/
 
     override fun getItemCount(): Int {
         return names.size

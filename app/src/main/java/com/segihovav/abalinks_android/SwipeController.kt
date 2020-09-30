@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.contains
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
@@ -60,20 +61,26 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
             if (buttonShowedState != ButtonsState.GONE) {
                 if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) dX = min(dX, -buttonWidth)
-                     super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                     Log.d("DevslashLog","Calling super.onChildDraw in onChildDraw called at " + LocalDateTime.now() + " when dX="+dX + ",dY="+dY+", actionstate="+actionState+", isCurrentlyActive="+isCurrentlyActive)
+                     super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, true)
             } else {
-                setTouchListener(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                Log.d("DevslashLog","Calling setTouchListener in onChildDraw called at " + LocalDateTime.now())
+                setTouchListener(c, recyclerView, viewHolder, dX, dY, actionState, true)
             }
 
+            Log.d("DevslashLog","Calling drawButtons in onChildDraw called at " + LocalDateTime.now())
             drawButtons(c, viewHolder)
         }
         if (buttonShowedState == ButtonsState.GONE) {
-            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+            Log.d("DevslashLog","Calling super.onChildDraw 2 in onChildDraw called at " + LocalDateTime.now())
+            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, true)
         }
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setTouchListener(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
+        //Log.d("SegiLog","setTouchListener called at " + LocalDateTime.now())
+
         recyclerView.setOnTouchListener { _, event ->
             swipeBack = event.action == MotionEvent.ACTION_CANCEL || event.action == MotionEvent.ACTION_UP
             if (swipeBack) {
@@ -92,6 +99,8 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setTouchDownListener(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
+        //Log.d("SegiLog","setTouchDownListener called at " + LocalDateTime.now())
+
         recyclerView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 setTouchUpListener(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
@@ -102,6 +111,7 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setTouchUpListener(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
+        //Log.d("SegiLog","setTouchUpListener called at " + LocalDateTime.now())
         recyclerView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
                 super@SwipeController.onChildDraw(c, recyclerView, viewHolder, 0f, dY, actionState, isCurrentlyActive)
@@ -122,6 +132,8 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
     }
 
     private fun setItemsClickable(recyclerView: RecyclerView, isClickable: Boolean) {
+        //Log.d("SegiLog","setItemsClickable called at " + LocalDateTime.now())
+
         for (i in 0 until recyclerView.childCount) {
             recyclerView.getChildAt(i).isClickable = isClickable
         }
@@ -138,8 +150,10 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
         //val leftButton = RectF(itemView.left.toFloat(), itemView.top.toFloat(), itemView.left + buttonWidth, itemView.bottom.toFloat())
         //c.drawBitmap(editBitmap, null, leftButton, p)
 
+        Log.d("DevslashLog","In drawButtons buttonShowedState="+ buttonShowedState + " when coordinates are " + (itemView.right.toFloat() - buttonWidth) + "," + itemView.top.toFloat() + "," + itemView.right.toFloat() + "," + itemView.bottom.toFloat())
         val rightButton = RectF(itemView.right.toFloat() - buttonWidth, itemView.top.toFloat(), itemView.right.toFloat() , itemView.bottom.toFloat())
         c.drawBitmap(editBitmap, null, rightButton, p)
+
         // left button - Good
         /*val leftButton = RectF(itemView.left.toFloat(), itemView.top.toFloat(), itemView.left + buttonWidth, itemView.bottom.toFloat())
         p.color = Color.RED
@@ -149,7 +163,6 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
         if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
             //buttonInstance = leftButton
             buttonInstance = rightButton
-
         }
     }
 

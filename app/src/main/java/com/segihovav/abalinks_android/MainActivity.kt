@@ -232,7 +232,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         super.onStop()
     }
 
-    private fun alert(message: String, closeApp: Boolean) {
+    private fun alert(message: String, closeApp: Boolean=false) {
         // Display dialog
         val builder = AlertDialog.Builder(this)
         builder
@@ -266,7 +266,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
             }
         }
 
-        // specify an adapter (see also next example)
+        // specify an adapter
         adapter = AbaLinksAdapter(abaLinkNames, abaLinkTypeNames)
         adapter.notifyDataSetChanged()
 
@@ -415,4 +415,10 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         @SuppressLint("StaticFieldLeak")
         var context: Context? = null
     }
+
+    fun editLinkClick(view: View,position: Int) {
+     alert("Edit Click")
+    }
+
+    fun editLinkClick(view: View) {}
 }
