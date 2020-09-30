@@ -35,7 +35,7 @@ class AbaLinksAdapter(private val names: List<String>,private val abaLinksTypeNa
 
             if (sharedPreferences.getBoolean("DarkThemeOn", false)) holder.name.setLinkTextColor(Color.rgb(255, 255, 255)) else holder.name.setLinkTextColor(Color.rgb(0, 0, 0))
         } else {
-            holder.name.text = names[position];
+            holder.name.text = names[position]
         }
 
         if (position<abaLinksTypeNames.size)

@@ -37,9 +37,11 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 // TO DO
+// DONE - after adding the url after first run, the app crashes in onresume
+// DONE - searching for text doesnt return any results when not in filtered view
+// DONE - replace delete icon with white icon instead of black
 
-// icon disappears
-// after adding the url after first run, the app crashes in onresume
+// swipe icon disappears sometimes
 
 class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemSelectedListener {
     private lateinit var abaLinksURL: String
@@ -72,12 +74,12 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         // Init the SwipeController
         val mSwipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.swipe_container)
         swipeController = SwipeController(object : SwipeControllerActions() {}, abaLinksList)
-        swipeController.setMainActivity(this);
+        swipeController.setMainActivity(this)
 
         // init swipe listener
         mSwipeRefreshLayout.setOnRefreshListener(this)
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary, android.R.color.holo_green_dark, android.R.color.holo_orange_dark, android.R.color.holo_blue_dark)
-        mSwipeRefreshLayout.setOnRefreshListener { loadJSONData(true); searchView.setText(searchView.text) }
+        mSwipeRefreshLayout.setOnRefreshListener { loadJSONData(true); searchView.text = searchView.text }
 
         episodeListView = findViewById(R.id.episodeList)
 
@@ -88,15 +90,14 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
             abaLinksURL+="/"
 
         if (abaLinksURL == "") {
-            alert("Please set the URL to your instance of AbaLinks in Settings", false)
-            return
+            loadSettingsActivity()
         }
 
         searchView = findViewById(R.id.searchView)
 
         searchTypeIDSpinner = findViewById<Spinner>(R.id.searchTypeIDSpinner)
 
-        searchTypeIDSpinner.setOnItemSelectedListener(this)
+        searchTypeIDSpinner.onItemSelectedListener = this
 
         // Search change event
         searchView.addTextChangedListener(object : TextWatcher {
@@ -124,9 +125,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                                 abaLinksListFiltered.add(abaLinksList[i])
                             }
                             else -> {
-                                if (itemName != null && itemName.contains(searchTerm) && (searchTypeID == -1 || (searchTypeID != -1 && searchTypeID == itemTypeID) )) {
+                                if (itemName != null && itemName.contains(searchTerm) && ((searchTypeID == -1 || searchTypeID == 6) || (searchTypeID != -1 && searchTypeID == itemTypeID))) {
                                     abaLinksListFiltered.add(abaLinksList[i])
-                                } else if (itemURL != null && itemURL.contains(s) && (searchTypeID == -1 || (searchTypeID != -1 && searchTypeID == itemTypeID) )) {
+                                } else if (itemURL != null && itemURL.contains(s) && ((searchTypeID == -1 || searchTypeID == 6) || (searchTypeID != -1 && searchTypeID == itemTypeID) )) {
                                     abaLinksListFiltered.add(abaLinksList[i])
                                 }
                             }
@@ -161,7 +162,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
         // Set text to itself if the user selects a type filter to trigger the searchView.addTextChangedListener event
-        searchView.setText(searchView.text)
+        searchView.text = searchView.text
     }
 
     override fun onNothingSelected(p0: AdapterView<*>?) { }
@@ -170,8 +171,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         val id = item.itemId
 
         if (id == R.id.action_settings) { // Settings menu
-            val intent = Intent(this, SettingsActivity::class.java)
-            startActivity(intent)
+            loadSettingsActivity()
+
             return true
         } else if (id == R.id.action_add) {
             val intent = Intent(this, EditActivity::class.java)
@@ -234,9 +235,10 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
     private fun alert(message: String, closeApp: Boolean) {
         // Display dialog
         val builder = AlertDialog.Builder(this)
-        builder.setMessage(message)
-                .setCancelable(false)
+        builder
+                .setMessage(message).setCancelable(false)
                 .setPositiveButton("OK") { _, _ -> if (closeApp) finish() }
+
         val alert = builder.create()
 
         alert.show()
@@ -367,7 +369,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                      val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, abaLinksTypeNames)
 
                      // attaching data adapter to spinner
-                     searchTypeIDSpinner.setAdapter(dataAdapter);
+                     searchTypeIDSpinner.adapter = dataAdapter
 
                      swipeController.setLinkTypes(abaLinksTypes)
 
@@ -379,11 +381,16 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         requestQueue.add(request)
     }
 
+    private fun loadSettingsActivity() {
+        val intent = Intent(this, SettingsActivity::class.java)
+        startActivity(intent)
+    }
+
     // Visibility is always toggled
     fun searchViewIsVisible() {
         val swipeControl = findViewById<SwipeRefreshLayout>(R.id.swipe_container)
 
-        val isHidden=if(searchView.visibility == View.VISIBLE) false else true
+        val isHidden= searchView.visibility != View.VISIBLE
 
         searchView.visibility = if (!isHidden) View.GONE else View.VISIBLE
         searchView.requestFocus()
@@ -391,7 +398,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         searchTypeIDSpinner.visibility = if (!isHidden) View.GONE else View.VISIBLE
 
         // Set top margin on tthe swipeControl which contains the episode Recyclerview when showing the search field and search type dropdown
-        val params: ViewGroup.MarginLayoutParams = swipeControl.getLayoutParams() as ViewGroup.MarginLayoutParams
+        val params: ViewGroup.MarginLayoutParams = swipeControl.layoutParams as ViewGroup.MarginLayoutParams
 
         if (isHidden) {
             params.setMargins(0, 300, 0, 0)

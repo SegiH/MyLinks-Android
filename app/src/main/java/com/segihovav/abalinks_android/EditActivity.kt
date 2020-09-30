@@ -1,4 +1,4 @@
-package com.segihovav.abalinks_android;
+package com.segihovav.abalinks_android
 
 import android.app.AlertDialog
 import android.content.Intent
@@ -54,7 +54,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           typeIDSpinner = findViewById<Spinner>(R.id.TypeID)
 
           // Spinner click listener
-          typeIDSpinner.setOnItemSelectedListener(this);
+          typeIDSpinner.onItemSelectedListener = this
 
           deleteLink = findViewById(R.id.deleteLink)
 
@@ -65,10 +65,10 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                     if (extras.getBoolean("com.segihovav.abalinks_android.IsAdding") == true) {
                          isAdding = true
 
-                         titleBar.setText("New link")
+                         titleBar.text = "New link"
 
                          // Hide delete icon when adding a new link
-                         deleteLink.setVisibility(View.GONE);
+                         deleteLink.visibility = View.GONE
                     }
                } catch (e: Exception) {
                     isAdding = false
@@ -86,8 +86,6 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                     if (linkTypeIDStr != null && linkTypeIDStr != "")
                          LinkTypeID=linkTypeIDStr.toInt()
 
-                    //var LinktypeID :Int = if (IDKey != null && extras.getString(IDKey) != null && extras.getString(IDKey) != "") extras.getString(IDKey).toInt() else 0
-
                     var LinkTypeName = extras.getString("com.segihovav.abalinks_android.LinkTypeName" + counter)
 
                     abaLinksTypes.add(AbaLinkType(LinkTypeID, LinkTypeName))
@@ -102,10 +100,10 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                }
 
                // Creating adapter for spinner
-               val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, abaLinksTypeNames)
+               val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, abaLinksTypeNames)
 
                // attaching data adapter to spinner
-               typeIDSpinner.setAdapter(dataAdapter);
+               typeIDSpinner.adapter = dataAdapter
 
                if (!isAdding) {
                    val IDStr =  extras.getString("com.segihovav.abalinks_android.LinkID")
@@ -122,7 +120,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
                    var link=AbaLink(ID, extras.getString("com.segihovav.abalinks_android.LinkName"),extras.getString("com.segihovav.abalinks_android.LinkURL"), linkTypeID)
 
-                   titleBar.setText("AbaLink # " + link.ID)
+                    titleBar.text = "AbaLink # " + link.ID
 
                    Name.editText?.setText(link.Name)
 
@@ -135,11 +133,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                                      typeIDSpinner.setSelection(j)
                                 }
                            }
-                           //Log.d("","")
-                           //typeIDSpinner.setSelection(link.TypeID+1)
                        }
-                         //typeIDSpinner.sets
-                           //break
                    }
                }
           }
@@ -257,8 +251,6 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                   abaLinksURL + getLinkDataEndpoint + params,
                   null,
                   Response.Listener { _ ->
-                       //if (getLinkDataEndpoint.contains("deleteRow"))
-                       //     return@Listener
                   },
                   Response.ErrorListener {
                        //System.out.println("****** Error response=" + error.toString());

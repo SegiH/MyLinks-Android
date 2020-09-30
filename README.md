@@ -6,7 +6,7 @@ This app supports all of the same features that the web app does but was develop
 
 ### Usage
 
-When you run the app for the first time, you will see a pop up message telling you to enter the URL of your WTF Indexer instance. You can find this in the settings by tapping on the 3 dot menu at the top right.
+When you run the app for the first time, you will see a pop up message telling you to enter the URL of your Aba Links instance. You can find this in the settings by tapping on the 3 dot menu at the top right.
 
 You can find a precompiled apk in the release section.
 

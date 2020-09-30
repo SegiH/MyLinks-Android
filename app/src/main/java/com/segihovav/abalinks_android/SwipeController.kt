@@ -10,24 +10,25 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 import kotlin.math.max
+import kotlin.math.min
 
 internal enum class ButtonsState {
-    GONE, LEFT_VISIBLE //, RIGHT_VISIBLE
+    GONE, RIGHT_VISIBLE
 }
 
 internal class SwipeController(private val buttonsActions: SwipeControllerActions, private var abaLinksList: List<AbaLink>) : ItemTouchHelper.Callback() {
     private var swipeBack = false
     private var buttonShowedState = ButtonsState.GONE
     private lateinit var buttonInstance: RectF
-    private var mainActivity: AppCompatActivity? = null;
+    private var mainActivity: AppCompatActivity? = null
     private var linkTypes: ArrayList<AbaLinkType> = ArrayList()
 
     fun setLinkTypes(_linkTypes: ArrayList<AbaLinkType>) {
-         this.linkTypes=_linkTypes;
+         this.linkTypes=_linkTypes
     }
 
     fun setMainActivity(_mainActivity: AppCompatActivity) {
-        this.mainActivity=_mainActivity;
+        this.mainActivity=_mainActivity
     }
 
     fun setAbaLinksList(newAbaLinksList: List<AbaLink>) {
@@ -35,14 +36,14 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
     }
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
-        return makeMovementFlags(0, ItemTouchHelper.RIGHT)
+        return makeMovementFlags(0, ItemTouchHelper.LEFT)
     }
 
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
         return false
     }
 
-    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) { }
 
     override fun convertToAbsoluteDirection(flags: Int, layoutDirection: Int): Int {
         if (swipeBack) {
@@ -51,17 +52,16 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
             return 0
         }
 
-        return super.convertToAbsoluteDirection(flags, 1)
+        return super.convertToAbsoluteDirection(flags, layoutDirection)
     }
 
     override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
         var dX = dX
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
             if (buttonShowedState != ButtonsState.GONE) {
-                if (buttonShowedState == ButtonsState.LEFT_VISIBLE) dX = max(dX, buttonWidth)
+                if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) dX = min(dX, -buttonWidth)
                      super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             } else {
-                Log.d("SegiLog","isCurrentlyActive="+isCurrentlyActive+ "action state="+actionState)
                 setTouchListener(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             }
 
@@ -77,8 +77,8 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
         recyclerView.setOnTouchListener { _, event ->
             swipeBack = event.action == MotionEvent.ACTION_CANCEL || event.action == MotionEvent.ACTION_UP
             if (swipeBack) {
-                if (dX > buttonWidth) {
-                    buttonShowedState = ButtonsState.LEFT_VISIBLE
+                if (dX < -buttonWidth) {
+                    buttonShowedState = ButtonsState.RIGHT_VISIBLE
                 }
 
                 if (buttonShowedState != ButtonsState.GONE) {
@@ -109,8 +109,8 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
                 setItemsClickable(recyclerView, true)
                 swipeBack = false
 
-                if (buttonsActions != null && buttonInstance != null && buttonInstance.contains(event.getX(),event.getY())) {
-                    if (buttonShowedState == ButtonsState.LEFT_VISIBLE) {
+                if (buttonsActions != null && buttonInstance != null && buttonInstance.contains(event.x,event.y)) {
+                    if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
                         mainActivity?.let { buttonsActions.onLeftClicked(abaLinksList, viewHolder.adapterPosition, it, linkTypes) }
                     }
                 }
@@ -135,43 +135,25 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
         //val pos = viewHolder.adapterPosition
 
         val editBitmap = BitmapFactory.decodeResource(viewHolder.itemView.resources, R.drawable.edit)
-        val leftButton = RectF(itemView.left.toFloat(), itemView.top.toFloat(), itemView.left + buttonWidth, itemView.bottom.toFloat())
-        c.drawBitmap(editBitmap, null, leftButton, p)
+        //val leftButton = RectF(itemView.left.toFloat(), itemView.top.toFloat(), itemView.left + buttonWidth, itemView.bottom.toFloat())
+        //c.drawBitmap(editBitmap, null, leftButton, p)
 
+        val rightButton = RectF(itemView.right.toFloat() - buttonWidth, itemView.top.toFloat(), itemView.right.toFloat() , itemView.bottom.toFloat())
+        c.drawBitmap(editBitmap, null, rightButton, p)
         // left button - Good
         /*val leftButton = RectF(itemView.left.toFloat(), itemView.top.toFloat(), itemView.left + buttonWidth, itemView.bottom.toFloat())
         p.color = Color.RED
         c.drawRoundRect(leftButton, corners, corners, p)
         drawText("Edit", c, leftButton, p, 0)*/
 
-        //val editBitmap = BitmapFactory.decodeResource(viewHolder.itemView.resources, R.drawable.edit)
-        //val imageview = (ImageView)findViewById(R.drawable.edit);
-        //ImageView imageview;
-        //val editBitmap = BitmapFactory.decodeResource(null, R.drawable.edit)
-        //val picBitmap = BitmapFactory.decodeFile("@drawable/edit")
-        //val customMatrix = Matrix()
-        //c.drawBitmap(editBitmap,Rect(0,0,0,0),Rect(0,0,0,0),p)
-        /*c.withMatrix(customMatrix) {
-            drawBitmap(editBitmap, null, leftButton, p)
-        }*/
-        //val customMatrix=Matrix();
-        //customMatrix.setScale(1.0F,1.0F)
-        //c.drawBitmap(editBitmap, customMatrix, p)
+        if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
+            //buttonInstance = leftButton
+            buttonInstance = rightButton
 
-        /*val rightButton = RectF(itemView.right - buttonWidthWithoutPadding, itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat())
-        p.color = Color.BLUE
-        c.drawRoundRect(rightButton, corners, corners, p)
-        drawText("Delete",c, rightButton, p, 0)*/
-
-        //buttonInstance = null
-
-        if (buttonShowedState == ButtonsState.LEFT_VISIBLE) {
-            buttonInstance = leftButton
-            //buttonInstance = editBitmap
         }
     }
 
-    private fun drawText(text: String, c: Canvas, button: RectF, p: Paint, y: Int) {
+    /*private fun drawText(text: String, c: Canvas, button: RectF, p: Paint, y: Int) {
         val textSize = 30f
         p.color = Color.WHITE
         p.isAntiAlias = true
@@ -183,7 +165,7 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
 
         //val editBitmap = BitmapFactory.decodeResource(null, R.drawable.edit)
         //c.drawBitmap(editBitmap,0,0,p);
-    }
+    }*/
 
     companion object {
         private const val buttonWidth = 200f
