@@ -37,7 +37,10 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 // TO DO
-// See i you can replace edit button with pencil icon
+
+// icon disappears
+// after adding the url after first run, the app crashes in onresume
+
 class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemSelectedListener {
     private lateinit var abaLinksURL: String
     private val abaLinksList: MutableList<AbaLink> = ArrayList()
@@ -197,11 +200,13 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
     // Fixes the issue that causes the swipe buttons to disappear when leaving the app
     public override fun onResume() {
         super.onResume()
-        // When resuming this activity, hide the search field and search type dropdown
-        if (searchView.visibility == View.VISIBLE)
-            searchViewIsVisible()
 
-        loadTypes()
+        // When resuming this activity, hide the search field and search type dropdown
+        //if (searchView != null && searchView.visibility == View.VISIBLE)
+        //    searchViewIsVisible()
+
+        if (abaLinksURL != "")
+             loadTypes()
 
         if (episodeListView.adapter != null) episodeListView.adapter?.notifyDataSetChanged()
     }
@@ -209,6 +214,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
     // Event when this activity returns from another activity
     public override fun onStart() {
         super.onStart()
+
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         // Since onCreate() doesn't get called when returning from another activity, we have to set AbaLinksURL here
@@ -217,7 +223,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         if (abaLinksURL != "" && !abaLinksURL.endsWith("/"))
             abaLinksURL+="/"
 
-        if (abaLinksTypes.size == 0)
+        if (abaLinksTypes.size == 0 && abaLinksURL != "")
              loadTypes()
     }
 

@@ -15,12 +15,10 @@ internal enum class ButtonsState {
     GONE, LEFT_VISIBLE //, RIGHT_VISIBLE
 }
 
-internal class SwipeController(
-        private val buttonsActions: SwipeControllerActions, private var abaLinksList: List<AbaLink>) : ItemTouchHelper.Callback() {
+internal class SwipeController(private val buttonsActions: SwipeControllerActions, private var abaLinksList: List<AbaLink>) : ItemTouchHelper.Callback() {
     private var swipeBack = false
     private var buttonShowedState = ButtonsState.GONE
-    //private lateinit var buttonInstance: RectF
-    private lateinit var buttonInstance: Bitmap
+    private lateinit var buttonInstance: RectF
     private var mainActivity: AppCompatActivity? = null;
     private var linkTypes: ArrayList<AbaLinkType> = ArrayList()
 
@@ -37,7 +35,7 @@ internal class SwipeController(
     }
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
-        return makeMovementFlags(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT)
+        return makeMovementFlags(0, ItemTouchHelper.RIGHT)
     }
 
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
@@ -46,19 +44,13 @@ internal class SwipeController(
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
 
-    /*override fun convertToAbsoluteDirection(flags: Int, layoutDirection: Int): Int {
-        return if (swipeBack) 0 else super.convertToAbsoluteDirection(flags, layoutDirection)
-    }*/
-
-    // Conitune here. Causes image to disappear
     override fun convertToAbsoluteDirection(flags: Int, layoutDirection: Int): Int {
         if (swipeBack) {
             swipeBack = buttonShowedState != ButtonsState.GONE
-            Log.d("SegiLog", "Returning 0");
+
             return 0
         }
 
-        Log.d("SegiLog", "Not returning 0");
         return super.convertToAbsoluteDirection(flags, 1)
     }
 
@@ -67,11 +59,12 @@ internal class SwipeController(
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
             if (buttonShowedState != ButtonsState.GONE) {
                 if (buttonShowedState == ButtonsState.LEFT_VISIBLE) dX = max(dX, buttonWidth)
-
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                     super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             } else {
+                Log.d("SegiLog","isCurrentlyActive="+isCurrentlyActive+ "action state="+actionState)
                 setTouchListener(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             }
+
             drawButtons(c, viewHolder)
         }
         if (buttonShowedState == ButtonsState.GONE) {
@@ -116,8 +109,7 @@ internal class SwipeController(
                 setItemsClickable(recyclerView, true)
                 swipeBack = false
 
-                // Continue here this causes the page to not load
-                if (buttonsActions != null && buttonInstance != null && buttonInstance.contains(Point(event.x.toInt(), event.y.toInt()))) {
+                if (buttonsActions != null && buttonInstance != null && buttonInstance.contains(event.getX(),event.getY())) {
                     if (buttonShowedState == ButtonsState.LEFT_VISIBLE) {
                         mainActivity?.let { buttonsActions.onLeftClicked(abaLinksList, viewHolder.adapterPosition, it, linkTypes) }
                     }
@@ -142,11 +134,9 @@ internal class SwipeController(
         val p = Paint()
         //val pos = viewHolder.adapterPosition
 
-        // Draw edit icon for first item only
         val editBitmap = BitmapFactory.decodeResource(viewHolder.itemView.resources, R.drawable.edit)
-        c.drawBitmap(editBitmap, null, RectF(itemView.left.toFloat(), itemView.top.toFloat(), itemView.left + buttonWidth, itemView.bottom.toFloat()), p)
-        //val leftButton = RectF(itemView.left.toFloat(), itemView.top.toFloat(), itemView.left + buttonWidth, itemView.bottom.toFloat())
-        //c.drawBitmap(editBitmap,Matrix(),p)
+        val leftButton = RectF(itemView.left.toFloat(), itemView.top.toFloat(), itemView.left + buttonWidth, itemView.bottom.toFloat())
+        c.drawBitmap(editBitmap, null, leftButton, p)
 
         // left button - Good
         /*val leftButton = RectF(itemView.left.toFloat(), itemView.top.toFloat(), itemView.left + buttonWidth, itemView.bottom.toFloat())
@@ -176,8 +166,8 @@ internal class SwipeController(
         //buttonInstance = null
 
         if (buttonShowedState == ButtonsState.LEFT_VISIBLE) {
-            //buttonInstance = leftButton
-            buttonInstance = editBitmap
+            buttonInstance = leftButton
+            //buttonInstance = editBitmap
         }
     }
 

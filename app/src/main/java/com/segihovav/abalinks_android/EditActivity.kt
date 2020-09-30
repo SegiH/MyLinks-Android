@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -78,11 +79,18 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                while (extras.getString("com.segihovav.abalinks_android.LinkTypeID" + counter) != null) {
                     var IDKey="com.segihovav.abalinks_android.LinkTypeID" + counter
 
-                    var LinktypeID = if (extras.getString(IDKey) != null && extras.getString(IDKey) != "") extras.getInt(IDKey) else 0
+                    var linkTypeIDStr=extras.getString(IDKey)
+
+                    var LinkTypeID :Int = 0
+
+                    if (linkTypeIDStr != null && linkTypeIDStr != "")
+                         LinkTypeID=linkTypeIDStr.toInt()
+
+                    //var LinktypeID :Int = if (IDKey != null && extras.getString(IDKey) != null && extras.getString(IDKey) != "") extras.getString(IDKey).toInt() else 0
 
                     var LinkTypeName = extras.getString("com.segihovav.abalinks_android.LinkTypeName" + counter)
 
-                    abaLinksTypes.add(AbaLinkType(LinktypeID, LinkTypeName))
+                    abaLinksTypes.add(AbaLinkType(LinkTypeID, LinkTypeName))
 
                     if (isAdding)
                         abaLinksTypeNames.add("")
@@ -105,9 +113,14 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                     if (IDStr != null && IDStr != "")
                          ID=IDStr.toInt()
 
-                   var link=AbaLink(extras.getInt("com.segihovav.abalinks_android.LinkID"), extras.getString("com.segihovav.abalinks_android.LinkName"),extras.getString("com.segihovav.abalinks_android.LinkURL"), extras.getInt("com.segihovav.abalinks_android.LinkTypeID"))
+                   var LinkTypeIDstr=extras.getString("com.segihovav.abalinks_android.LinkTypeID")
 
-                   abaLinksTypes.clear()
+                   var linkTypeID: Int = 0
+
+                   if (LinkTypeIDstr != null && LinkTypeIDstr != "")
+                      linkTypeID=LinkTypeIDstr.toInt()
+
+                   var link=AbaLink(ID, extras.getString("com.segihovav.abalinks_android.LinkName"),extras.getString("com.segihovav.abalinks_android.LinkURL"), linkTypeID)
 
                    titleBar.setText("AbaLink # " + link.ID)
 
@@ -116,9 +129,17 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                    URL.editText?.setText(link.URL)
 
                    for (i in abaLinksTypes.indices) {
-                       if (abaLinksTypes[i].ID == link.TypeID)
-                           typeIDSpinner.setSelection(i - 1)
-                           break
+                       if (abaLinksTypes[i].ID == link.TypeID) {
+                           for (j in abaLinksTypeNames.indices) {
+                                if (abaLinksTypeNames[j] == abaLinksTypes[i].Name) {
+                                     typeIDSpinner.setSelection(j)
+                                }
+                           }
+                           //Log.d("","")
+                           //typeIDSpinner.setSelection(link.TypeID+1)
+                       }
+                         //typeIDSpinner.sets
+                           //break
                    }
                }
           }
