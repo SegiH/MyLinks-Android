@@ -23,6 +23,16 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
     private lateinit var buttonInstance: RectF
     private var mainActivity: AppCompatActivity? = null
     private var linkTypes: ArrayList<AbaLinkType> = ArrayList()
+    private var linkTypeNames: ArrayList<String> = ArrayList()
+    private var darkMode: Boolean = false
+
+    fun setDarkMode(_darkMode: Boolean) {
+        this.darkMode=_darkMode
+    }
+
+    fun setLinkTypeNames(_linkTypeNames: ArrayList<String>) {
+        this.linkTypeNames=_linkTypeNames
+    }
 
     fun setLinkTypes(_linkTypes: ArrayList<AbaLinkType>) {
          this.linkTypes=_linkTypes
@@ -112,7 +122,7 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
 
                 if (buttonInstance.contains(event.x,event.y)) {
                     if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
-                        mainActivity?.let { buttonsActions.onLeftClicked(abaLinksList, viewHolder.adapterPosition, it, linkTypes) }
+                        mainActivity?.let { buttonsActions.onLeftClicked(abaLinksList, viewHolder.adapterPosition, it, linkTypes,linkTypeNames) }
                     }
                 }
 
@@ -133,9 +143,8 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
         val corners = 16f
         val itemView = viewHolder.itemView
         val p = Paint()
-        //val pos = viewHolder.adapterPosition
 
-        val editBitmap = BitmapFactory.decodeResource(viewHolder.itemView.resources, R.drawable.edit)
+        val editBitmap = BitmapFactory.decodeResource(viewHolder.itemView.resources, if (!darkMode) R.drawable.edit_black else R.drawable.edit_white)
         //val leftButton = RectF(itemView.left.toFloat(), itemView.top.toFloat(), itemView.left + buttonWidth, itemView.bottom.toFloat())
         //c.drawBitmap(editBitmap, null, leftButton, p)
 

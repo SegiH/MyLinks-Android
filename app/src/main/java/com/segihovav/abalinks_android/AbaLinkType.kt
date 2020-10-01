@@ -9,26 +9,7 @@ data class AbaLinkType(var ID: Int, var Name: String? = ""): Parcelable {
 
     constructor(parcel: Parcel) : this(
             parcel.readInt(),
-            parcel.readString()) {
-        _ID = parcel.readInt()
-        _Name = parcel.readString().toString()
-    }
-
-    override fun describeContents(): Int {
-        return hashCode()
-    }
-
-    override fun writeToParcel(dest: Parcel, flags: Int) {
-        dest.writeInt(ID)
-        dest.writeString(Name)
-    }
-
-    //constructor used for parcel
-    fun AbaLinkType(parcel: Parcel) {
-        //read and set saved values from parcel
-        ID=parcel.readInt()
-        Name=parcel.readString().toString()
-    }
+            parcel.readString()) { }
 
     companion object CREATOR : Parcelable.Creator<AbaLinkType> {
         override fun createFromParcel(parcel: Parcel): AbaLinkType {
@@ -38,5 +19,14 @@ data class AbaLinkType(var ID: Int, var Name: String? = ""): Parcelable {
         override fun newArray(size: Int): Array<AbaLinkType?> {
             return arrayOfNulls(size)
         }
+    }
+
+    override fun describeContents(): Int {
+        return hashCode()
+    }
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeInt(ID)
+        dest.writeString(Name)
     }
 }

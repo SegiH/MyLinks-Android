@@ -18,6 +18,7 @@ class SettingsActivity : AppCompatActivity() {
      private val darkMode = R.style.Theme_AppCompat_DayNight
      private val lightMode = R.style.ThemeOverlay_MaterialComponents
      private var darkModeToggled = false
+
      override fun onCreate(savedInstanceState: Bundle?) {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         this.setTheme(if (sharedPreferences.getBoolean("DarkThemeOn", false)) darkMode else lightMode)
@@ -51,7 +52,7 @@ class SettingsActivity : AppCompatActivity() {
 
     fun darkModeClick(v: View?) {
         darkModeToggled = true
-        Toast.makeText(applicationContext, "The app will be restarted when you click on save for this to take effect" + if(darkModeCheckbox.isChecked) ". You must have Dark Mode enabled on Android " else "", Toast.LENGTH_SHORT).show()
+        Toast.makeText(applicationContext, "The app will be close when you click on save for this to take effect" + if(darkModeCheckbox.isChecked) ". You must have Dark Mode enabled on Android " else "", Toast.LENGTH_SHORT).show()
     }
 
     fun goBackClick(v: View?) {
@@ -68,8 +69,16 @@ class SettingsActivity : AppCompatActivity() {
         editor.putString("AbaLinksURL", abaLinksURL.editText?.text.toString())
         editor.putBoolean("DarkThemeOn", darkModeCheckbox.isChecked)
         editor.apply()
-        if (darkModeToggled) finishAffinity()
+
+        if (darkModeToggled) {
+            finishAffinity()
+        }
+
         val intent = Intent(this, MainActivity::class.java)
+
+        if (darkModeToggled)
+             intent.putExtra(getApplicationContext().getPackageName() + ".DarkModeToggled", true)
+
         startActivity(intent)
     }
 }

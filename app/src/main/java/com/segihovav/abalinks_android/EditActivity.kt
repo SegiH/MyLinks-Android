@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -15,19 +14,17 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.textfield.TextInputLayout
-import org.json.JSONArray
-import org.json.JSONException
 import java.util.*
 
 class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
      private lateinit var sharedPreferences: SharedPreferences
      private val darkMode = R.style.Theme_AppCompat_DayNight
      private val lightMode = R.style.ThemeOverlay_MaterialComponents
-     private val abaLinksTypes: ArrayList<AbaLinkType> = ArrayList()
-     private val abaLinksTypeNames: ArrayList<String> = ArrayList()
+     private var abaLinkItem: AbaLink? = null
+     private lateinit var abaLinksTypes: ArrayList<AbaLinkType>
+     private lateinit var abaLinksTypeNames: ArrayList<String>
      private lateinit var abaLinksURL: String
      private var isAdding: Boolean = false
-     private var ID: Int = 0
      private lateinit var Name: TextInputLayout
      private lateinit var URL: TextInputLayout
      private lateinit var typeIDSpinner: Spinner
@@ -62,7 +59,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
           if (extras != null) {
                try {
-                    if (extras.getBoolean("com.segihovav.abalinks_android.IsAdding") == true) {
+                    if (extras.getBoolean(getApplicationContext().getPackageName() + ".IsAdding") == true) {
                          isAdding = true
 
                          titleBar.text = "New link"
@@ -76,58 +73,34 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
                var counter = 0
 
-               while (extras.getString("com.segihovav.abalinks_android.LinkTypeID" + counter) != null) {
-                    var IDKey="com.segihovav.abalinks_android.LinkTypeID" + counter
+               abaLinksTypes = extras.getParcelableArrayList<AbaLinkType>(getApplicationContext().getPackageName() + ".LinkTypes") as ArrayList<AbaLinkType>
 
-                    var linkTypeIDStr=extras.getString(IDKey)
+               abaLinksTypeNames = extras.getStringArrayList(getApplicationContext().getPackageName() + ".LinkTypeNames") as ArrayList<String>
 
-                    var LinkTypeID :Int = 0
+               // remove All link type
+               abaLinksTypeNames.remove("All")
 
-                    if (linkTypeIDStr != null && linkTypeIDStr != "")
-                         LinkTypeID=linkTypeIDStr.toInt()
+               if (isAdding)
+                    abaLinksTypeNames.add(0,"")
 
-                    var LinkTypeName = extras.getString("com.segihovav.abalinks_android.LinkTypeName" + counter)
-
-                    abaLinksTypes.add(AbaLinkType(LinkTypeID, LinkTypeName))
-
-                    if (isAdding)
-                        abaLinksTypeNames.add("")
-
-                    if (LinkTypeName != null && LinkTypeName != "All")
-                         abaLinksTypeNames.add(LinkTypeName)
-
-                    counter++
-               }
-
-               // Creating adapter for spinner
+               // Creating adapter for spinner - For some reason when adding, we need to use android.R.layout.simple_spinner_item when adding or the TypeID spinner items will have too large of a gap between each item
                val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, abaLinksTypeNames)
 
                // attaching data adapter to spinner
                typeIDSpinner.adapter = dataAdapter
 
                if (!isAdding) {
-                   val IDStr =  extras.getString("com.segihovav.abalinks_android.LinkID")
+                    // Get Aba Link Item
+                    abaLinkItem=extras.getParcelable<AbaLink>(getApplicationContext().getPackageName() + ".LinkItem")
 
-                    if (IDStr != null && IDStr != "")
-                         ID=IDStr.toInt()
+                    titleBar.text = "AbaLink # " + abaLinkItem?.ID
 
-                   var LinkTypeIDstr=extras.getString("com.segihovav.abalinks_android.LinkTypeID")
+                   Name.editText?.setText(abaLinkItem?.Name)
 
-                   var linkTypeID: Int = 0
-
-                   if (LinkTypeIDstr != null && LinkTypeIDstr != "")
-                      linkTypeID=LinkTypeIDstr.toInt()
-
-                   var link=AbaLink(ID, extras.getString("com.segihovav.abalinks_android.LinkName"),extras.getString("com.segihovav.abalinks_android.LinkURL"), linkTypeID)
-
-                    titleBar.text = "AbaLink # " + link.ID
-
-                   Name.editText?.setText(link.Name)
-
-                   URL.editText?.setText(link.URL)
+                   URL.editText?.setText(abaLinkItem?.URL)
 
                    for (i in abaLinksTypes.indices) {
-                       if (abaLinksTypes[i].ID == link.TypeID) {
+                       if (abaLinksTypes[i].ID == abaLinkItem?.TypeID) {
                            for (j in abaLinksTypeNames.indices) {
                                 if (abaLinksTypeNames[j] == abaLinksTypes[i].Name) {
                                      typeIDSpinner.setSelection(j)
@@ -156,7 +129,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                builder.setPositiveButton("OK") { _, _ ->
                     val getLinkDataEndpoint = "LinkData.php?task=deleteRow"
 
-                    val params= "&LinkID=$ID"
+                    val params= "&LinkID=$abaLinkItem.ID"
 
                     processData(getLinkDataEndpoint, params)
 
@@ -216,17 +189,17 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           if (!isAdding) {
                getLinkDataEndpoint = "LinkData.php?task=updateRow"
 
-               params="&rowID=" + this.ID + "&columnName=Name&columnValue=" + name
+               params="&rowID=" + this.abaLinkItem?.ID + "&columnName=Name&columnValue=" + name
                processData(getLinkDataEndpoint, params)
 
-               params="&rowID=" + this.ID + "&columnName=URL&columnValue=" + url
+               params="&rowID=" + this.abaLinkItem?.ID + "&columnName=URL&columnValue=" + url
                processData(getLinkDataEndpoint, params)
 
                for (i in abaLinksTypes.indices) {
                     val linkTypeName= if (abaLinksTypes[i].Name != null) abaLinksTypes[i].Name else ""
 
                     if (linkTypeName == typeIDSpinner.selectedItem) {
-                         params="&rowID=" + this.ID + "&columnName=TypeID&columnValue=" + abaLinksTypes[i].ID
+                         params="&rowID=" + this.abaLinkItem?.ID + "&columnName=TypeID&columnValue=" + abaLinksTypes[i].ID
                          processData(getLinkDataEndpoint, params)
                     }
                }

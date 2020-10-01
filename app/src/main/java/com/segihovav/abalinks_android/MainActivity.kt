@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.os.Bundle
@@ -31,17 +32,25 @@ import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.Volley
+import com.google.android.material.internal.ContextUtils.getActivity
 import org.json.JSONArray
 import org.json.JSONException
 import java.util.*
 import kotlin.collections.ArrayList
 
 // TO DO
-// DONE - after adding the url after first run, the app crashes in onresume
-// DONE - searching for text doesnt return any results when not in filtered view
-// DONE - replace delete icon with white icon instead of black
+//  DONE -  When adding, type dropdown has gap that is too large
+// Bump app version to 2.0
+// When using dark mode, use white edit swipe image
+// After toggling dark mode, context menu doesnt update BG color until app is fully restarted
+// DONE replace all occurrences of package name in putExtra with getPackage
+// DONE - pass link item as AbaLink object instead of passing each individual property of the object
+// DONE - made all data passed to EditActivity passed as Parcelable item
+// DONE - // replace packagename in swipecontrolleractions and editactivity
+// DONE - Fix all occurrences of !!
 
 // swipe icon disappears sometimes
+// See if you can figure out a way to not exit the app after togglling dark mode in settings
 
 class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemSelectedListener {
     private lateinit var abaLinksURL: String
@@ -75,6 +84,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         val mSwipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.swipe_container)
         swipeController = SwipeController(object : SwipeControllerActions() {}, abaLinksList)
         swipeController.setMainActivity(this)
+
+        if (sharedPreferences.getBoolean("DarkThemeOn", false))
+                swipeController.setDarkMode(true)
 
         // init swipe listener
         mSwipeRefreshLayout.setOnRefreshListener(this)
@@ -117,17 +129,17 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
                         for (j in abaLinksTypes.indices) {
                             if (abaLinksTypes[j].Name == searchTypeIDSpinner.selectedItem)
-                                searchTypeID=abaLinksTypes[j].ID
+                                searchTypeID = abaLinksTypes[j].ID
                         }
 
-                        when(searchTerm) {
+                        when (searchTerm) {
                             "" -> if ((searchTypeID == -1 || searchTypeID == 6) || (searchTypeID != -1 && searchTypeID == itemTypeID)) {
                                 abaLinksListFiltered.add(abaLinksList[i])
                             }
                             else -> {
                                 if (itemName != null && itemName.contains(searchTerm) && ((searchTypeID == -1 || searchTypeID == 6) || (searchTypeID != -1 && searchTypeID == itemTypeID))) {
                                     abaLinksListFiltered.add(abaLinksList[i])
-                                } else if (itemURL != null && itemURL.contains(s) && ((searchTypeID == -1 || searchTypeID == 6) || (searchTypeID != -1 && searchTypeID == itemTypeID) )) {
+                                } else if (itemURL != null && itemURL.contains(s) && ((searchTypeID == -1 || searchTypeID == 6) || (searchTypeID != -1 && searchTypeID == itemTypeID))) {
                                     abaLinksListFiltered.add(abaLinksList[i])
                                 }
                             }
@@ -149,7 +161,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         val searchMenuItem = menu.findItem(R.id.action_search)
 
         // Search search menu icon based on the current theme
-        //searchMenuItem.setIcon(if (sharedPreferences.getBoolean("DarkThemeOn", false)) R.drawable.search_white else R.drawable.search_black)
         searchMenuItem.setIcon(R.drawable.search_white)
         return true
     }
@@ -177,16 +188,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         } else if (id == R.id.action_add) {
             val intent = Intent(this, EditActivity::class.java)
 
-            intent.putExtra("com.segihovav.abalinks_android.IsAdding", true)
-
-            var counter=0
-
-            // This seems to be the only way to copy the link types to another intent since I can't figure out how to use linkTypes as a value for putextra
-            for (i in abaLinksTypes.indices) {
-                intent.putExtra("com.segihovav.abalinks_android.LinkTypeID" + counter, abaLinksTypes[counter].ID.toString())
-                intent.putExtra("com.segihovav.abalinks_android.LinkTypeName" + counter, abaLinksTypes[counter].Name)
-                counter++
-            }
+            intent.putExtra(getApplicationContext().getPackageName() + ".IsAdding", true)
+            intent.putExtra(getApplicationContext().getPackageName() + ".LinkTypes",abaLinksTypes)
+            intent.putExtra(getApplicationContext().getPackageName() + ".LinkTypeNames",abaLinksTypeNames)
 
             startActivity(intent)
         } else if (id == R.id.action_search) {
@@ -201,6 +205,22 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
     // Fixes the issue that causes the swipe buttons to disappear when leaving the app
     public override fun onResume() {
         super.onResume()
+
+        val extras = intent.extras
+
+        if (extras != null && extras.getBoolean(getApplicationContext().getPackageName() + ".DarkModeToggled")) {
+            //val intent = Intent(this, MainActivity::class.java)
+
+            //startActivity(intent)
+
+            finishAndRemoveTask()
+
+            //recreate()
+
+            System.exit(0);
+
+            return
+        }
 
         // When resuming this activity, hide the search field and search type dropdown
         //if (searchView != null && searchView.visibility == View.VISIBLE)
@@ -232,12 +252,11 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
         super.onStop()
     }
 
-    private fun alert(message: String, closeApp: Boolean=false) {
+    private fun alert(message: String, closeApp: Boolean = false) {
         // Display dialog
         val builder = AlertDialog.Builder(this)
-        builder
-                .setMessage(message).setCancelable(false)
-                .setPositiveButton("OK") { _, _ -> if (closeApp) finish() }
+        builder.setMessage(message).setCancelable(false)
+               .setPositiveButton("OK") { _, _ -> if (closeApp) finish() }
 
         val alert = builder.create()
 
@@ -325,7 +344,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                     }
 
                     if (!isRefreshing)
-                         initRecyclerView(abaLinksList)
+                        initRecyclerView(abaLinksList)
                 },
                 Response.ErrorListener {
                     //System.out.println("****** Error response=" + error.toString());
@@ -372,6 +391,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                      searchTypeIDSpinner.adapter = dataAdapter
 
                      swipeController.setLinkTypes(abaLinksTypes)
+
+                     swipeController.setLinkTypeNames(abaLinksTypeNames)
 
                      loadJSONData()
                  },
