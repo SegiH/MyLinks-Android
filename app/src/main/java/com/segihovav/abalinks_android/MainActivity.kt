@@ -39,15 +39,6 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 // TO DO
-//  DONE -  When adding, type dropdown has gap that is too large
-// Bump app version to 2.0
-// When using dark mode, use white edit swipe image
-// After toggling dark mode, context menu doesnt update BG color until app is fully restarted
-// DONE replace all occurrences of package name in putExtra with getPackage
-// DONE - pass link item as AbaLink object instead of passing each individual property of the object
-// DONE - made all data passed to EditActivity passed as Parcelable item
-// DONE - // replace packagename in swipecontrolleractions and editactivity
-// DONE - Fix all occurrences of !!
 
 // swipe icon disappears sometimes
 // See if you can figure out a way to not exit the app after togglling dark mode in settings
