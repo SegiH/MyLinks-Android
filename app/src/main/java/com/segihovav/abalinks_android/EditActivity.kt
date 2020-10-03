@@ -44,11 +44,11 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
           val titleBar=findViewById<TextView>(R.id.TitleBar)
 
-          Name=findViewById<TextInputLayout>(R.id.Name)
+          Name=findViewById(R.id.Name)
 
-          URL=findViewById<TextInputLayout>(R.id.URL)
+          URL=findViewById(R.id.URL)
 
-          typeIDSpinner = findViewById<Spinner>(R.id.TypeID)
+          typeIDSpinner = findViewById(R.id.TypeID)
 
           // Spinner click listener
           typeIDSpinner.onItemSelectedListener = this
@@ -59,7 +59,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
           if (extras != null) {
                try {
-                    if (extras.getBoolean(getApplicationContext().getPackageName() + ".IsAdding") == true) {
+                    if (extras.getBoolean(applicationContext.packageName + ".IsAdding")) {
                          isAdding = true
 
                          titleBar.text = "New link"
@@ -71,11 +71,9 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                     isAdding = false
                }
 
-               var counter = 0
+               abaLinksTypes = extras.getParcelableArrayList<AbaLinkType>(applicationContext.packageName + ".LinkTypes") as ArrayList<AbaLinkType>
 
-               abaLinksTypes = extras.getParcelableArrayList<AbaLinkType>(getApplicationContext().getPackageName() + ".LinkTypes") as ArrayList<AbaLinkType>
-
-               abaLinksTypeNames = extras.getStringArrayList(getApplicationContext().getPackageName() + ".LinkTypeNames") as ArrayList<String>
+               abaLinksTypeNames = extras.getStringArrayList(applicationContext.packageName + ".LinkTypeNames") as ArrayList<String>
 
                // remove All link type
                abaLinksTypeNames.remove("All")
@@ -91,9 +89,9 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
                if (!isAdding) {
                     // Get Aba Link Item
-                    abaLinkItem=extras.getParcelable<AbaLink>(getApplicationContext().getPackageName() + ".LinkItem")
+                    abaLinkItem=extras.getParcelable<AbaLink>(applicationContext.packageName + ".LinkItem")
 
-                    titleBar.text = "AbaLink # " + abaLinkItem?.ID
+                    titleBar.text = "AbaLink # ${abaLinkItem?.ID}"
 
                    Name.editText?.setText(abaLinkItem?.Name)
 
@@ -129,7 +127,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                builder.setPositiveButton("OK") { _, _ ->
                     val getLinkDataEndpoint = "LinkData.php?task=deleteRow"
 
-                    val params= "&LinkID=$abaLinkItem.ID"
+                    val params= "&LinkID=${abaLinkItem?.ID}"
 
                     processData(getLinkDataEndpoint, params)
 
@@ -189,17 +187,17 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           if (!isAdding) {
                getLinkDataEndpoint = "LinkData.php?task=updateRow"
 
-               params="&rowID=" + this.abaLinkItem?.ID + "&columnName=Name&columnValue=" + name
+               params="&rowID=${this.abaLinkItem?.ID}&columnName=Name&columnValue=${name}"
                processData(getLinkDataEndpoint, params)
 
-               params="&rowID=" + this.abaLinkItem?.ID + "&columnName=URL&columnValue=" + url
+               params="&rowID=${this.abaLinkItem?.ID}&columnName=URL&columnValue=${url}"
                processData(getLinkDataEndpoint, params)
 
                for (i in abaLinksTypes.indices) {
                     val linkTypeName= if (abaLinksTypes[i].Name != null) abaLinksTypes[i].Name else ""
 
                     if (linkTypeName == typeIDSpinner.selectedItem) {
-                         params="&rowID=" + this.abaLinkItem?.ID + "&columnName=TypeID&columnValue=" + abaLinksTypes[i].ID
+                         params="&rowID=${this.abaLinkItem?.ID}&columnName=TypeID&columnValue=${abaLinksTypes[i].ID}"
                          processData(getLinkDataEndpoint, params)
                     }
                }
@@ -207,7 +205,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           } else { // Save new item
                getLinkDataEndpoint = "LinkData.php?task=insertRow"
 
-               params="&Name=" + name + "&URL=" + url + "&Type=" + typeIDSpinner.selectedItem
+               params="&Name=${name}&URL=${url}&Type=${typeIDSpinner.selectedItem}"
 
                processData(getLinkDataEndpoint, params)
           }
@@ -220,15 +218,13 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
           val request = JsonArrayRequest(
-                  Request.Method.GET,
-                  abaLinksURL + getLinkDataEndpoint + params,
-                  null,
-                  Response.Listener { _ ->
-                  },
-                  Response.ErrorListener {
-                       //System.out.println("****** Error response=" + error.toString());
-                       //alert("An error occurred " + if(!isAdding) "saving" else "adding" + " the link with the error ", false)
-                  })
+               Request.Method.GET, abaLinksURL + getLinkDataEndpoint + params, null,
+               { _ ->
+               },
+               {
+                    //System.out.println("****** Error response=" + error.toString());
+                    //alert("An error occurred " + if(!isAdding) "saving" else "adding" + " the link with the error ", false)
+               })
 
           requestQueue.add(request)
      }

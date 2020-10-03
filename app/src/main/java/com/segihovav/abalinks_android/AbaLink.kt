@@ -5,13 +5,7 @@ import android.os.Parcelable
 import java.util.ArrayList
 
 data class AbaLink(var ID: Int, var Name: String?, var URL: String?, var TypeID: Int) : Parcelable {
-    var _ID: Int = 0
-    var _Name: String = ""
-    var _URL: String =""
-    var _TypeID: Int = 0
-    var _abaLinksTypes: MutableList<AbaLinkType> = ArrayList()
-
-    constructor(parcel: Parcel) : this(
+  constructor(parcel: Parcel) : this(
             parcel.readInt(),
             parcel.readString(),
             parcel.readString(),
@@ -32,9 +26,9 @@ data class AbaLink(var ID: Int, var Name: String?, var URL: String?, var TypeID:
     }
 
     //write object values to parcel for storage
-    override fun writeToParcel(dest: Parcel?, flags: Int) {
-        //write all properties to the parcle
-        dest!!.writeInt(ID)
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        //write all properties
+        dest.writeInt(ID)
         dest.writeString(Name)
         dest.writeString(URL)
         dest.writeInt(TypeID)

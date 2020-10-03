@@ -4,10 +4,7 @@ import android.os.Parcel
 import android.os.Parcelable
 
 data class AbaLinkType(var ID: Int, var Name: String? = ""): Parcelable {
-    var _ID: Int = 0
-    lateinit var _Name: String
-
-    constructor(parcel: Parcel) : this(
+  constructor(parcel: Parcel) : this(
             parcel.readInt(),
             parcel.readString()) { }
 
