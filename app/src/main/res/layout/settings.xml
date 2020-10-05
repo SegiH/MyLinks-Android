@@ -59,6 +59,7 @@
          android:layout_marginTop="100dp"
          android:switchPadding = "15dp"
          android:onClick="darkModeClick"
+         android:visibility="invisible" /><!-- Dark mode messes up Recyclerview and causes it to rendere correctly -->
     />
 
     <Button

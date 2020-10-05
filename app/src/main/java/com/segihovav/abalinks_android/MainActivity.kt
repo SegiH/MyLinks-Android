@@ -37,16 +37,8 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 // TO DO
-// done - remove unused variables
-// done swipe icon disappears sometimes
-// done - add share
-// done - opening is now done from swipe to avoid accidental clicks
-// done - replace all uses of !!
 
-// replace string concatenation with string substitution
 // See if you can figure out a way to not exit the app after togglling dark mode in settings
-
-
 class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemSelectedListener {
      private lateinit var abaLinksURL: String
      private val abaLinksList: MutableList<AbaLink> = ArrayList()
@@ -56,7 +48,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      private lateinit var sharedPreferences: SharedPreferences
      private lateinit var searchTypeIDSpinner: Spinner
      private lateinit var episodeListView: RecyclerView
-     private val darkMode = R.style.Theme_AppCompat_DayNight
+     private val darkMode = R.style.Theme_MaterialComponents_DayNight_DarkActionBar
      private val lightMode = R.style.ThemeOverlay_MaterialComponents
      private var recyclerviewAdapter: RecyclerviewAdapter? = null
      private lateinit var touchListener: RecyclerTouchListener
@@ -92,49 +84,45 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           if (abaLinksURL != "" && !abaLinksURL.endsWith("/"))
                abaLinksURL+="/"
 
-          if (abaLinksURL == "") {
+          if (abaLinksURL == "")
                loadSettingsActivity()
-          }
 
           touchListener = RecyclerTouchListener(this, episodeListView)
           touchListener
           .setClickable(object : RecyclerTouchListener.OnRowClickListener {
-            override fun onRowClicked(position: Int) {
-              //Toast.makeText(applicationContext, abaLinksList.get(position).Name, Toast.LENGTH_SHORT).show()
-            }
+               override fun onRowClicked(position: Int) {
+                    //Toast.makeText(applicationContext, abaLinksList.get(position).Name, Toast.LENGTH_SHORT).show()
+               }
 
-            override fun onIndependentViewClicked(independentViewID: Int, position: Int) {}
+               override fun onIndependentViewClicked(independentViewID: Int, position: Int) {}
           })
           .setSwipeOptionViews(R.id.open_link, R.id.delete_link, R.id.edit_link, R.id.share_link)
           .setSwipeable(R.id.rowFG, R.id.rowBG, object : RecyclerTouchListener.OnSwipeOptionsClickListener {
-            override fun onSwipeOptionClicked(viewID: Int, position: Int) {
-              when (viewID) {
-                R.id.delete_link -> alert("Are you sure that you want to delete this link ?", closeApp = false, confirmDialog = true, deletingItemIndex = position)
-                R.id.edit_link -> {
-                  val intent = Intent(context, EditActivity::class.java)
+               override fun onSwipeOptionClicked(viewID: Int, position: Int) {
+                    when (viewID) {
+                         R.id.delete_link -> alert("Are you sure that you want to delete this link ?", closeApp = false, confirmDialog = true, deletingItemIndex = position)
+                         R.id.edit_link -> {
+                              val intent = Intent(context, EditActivity::class.java)
 
-                  intent.putExtra(applicationContext.packageName + ".LinkItem", abaLinksList[position])
-                  intent.putExtra(applicationContext.packageName + ".LinkTypes", abaLinksTypes)
-                  intent.putExtra(applicationContext.packageName + ".LinkTypeNames", abaLinksTypeNames)
+                              intent.putExtra(applicationContext.packageName + ".LinkItem", abaLinksList[position])
+                              intent.putExtra(applicationContext.packageName + ".LinkTypes", abaLinksTypes)
+                              intent.putExtra(applicationContext.packageName + ".LinkTypeNames", abaLinksTypeNames)
 
-                  startActivity(intent)
-                }
-                R.id.open_link -> {
-                  startActivity(Intent(Intent.ACTION_VIEW, parse(abaLinksList[position].URL)))
-                  //alert("Open link", closeApp = false)
-                }
-                R.id.share_link -> {
-                  val sendIntent: Intent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, abaLinksList[position].URL)
-                    type = "text/plain"
-                  }
+                              startActivity(intent)
+                         }
+                         R.id.open_link -> startActivity(Intent(Intent.ACTION_VIEW, parse(abaLinksList[position].URL)))
+                         R.id.share_link -> {
+                              val sendIntent: Intent = Intent().apply {
+                                   action = Intent.ACTION_SEND
+                                   putExtra(Intent.EXTRA_TEXT, abaLinksList[position].URL)
+                                   type = "text/plain"
+                              }
 
-                  val shareIntent = Intent.createChooser(sendIntent, null)
-                  startActivity(shareIntent)
-                }
-              }
-            }
+                              val shareIntent = Intent.createChooser(sendIntent, null)
+                              startActivity(shareIntent)
+                         }
+                    }
+               }
           })
 
           episodeListView.addOnItemTouchListener(touchListener)
@@ -147,45 +135,44 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
           // Search change event
           searchView.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-              if (s != "") {
-                val abaLinksListFiltered: MutableList<AbaLink> = ArrayList()
+               override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+               override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                    if (s != "") {
+                         val abaLinksListFiltered: MutableList<AbaLink> = ArrayList()
 
-                for (i in abaLinksList.indices) {
-                  // If the search term is contained in the name or URL
-                  val itemName = abaLinksList[i].Name?.toLowerCase(Locale.ROOT)
-                  val itemURL = abaLinksList[i].URL
-                  val itemTypeID = abaLinksList[i].TypeID
+                         for (i in abaLinksList.indices) {
+                              // If the search term is contained in the name or URL
+                              val itemName = abaLinksList[i].Name?.toLowerCase(Locale.ROOT)
+                              val itemURL = abaLinksList[i].URL
+                              val itemTypeID = abaLinksList[i].TypeID
 
-                  val searchTerm = s.toString().toLowerCase(Locale.ROOT)
-                  var searchTypeID = -1
+                              val searchTerm = s.toString().toLowerCase(Locale.ROOT)
+                              var searchTypeID = -1
 
-                  for (j in abaLinksTypes.indices) {
-                    if (abaLinksTypes[j].Name == searchTypeIDSpinner.selectedItem)
-                      searchTypeID = abaLinksTypes[j].ID
-                  }
+                              for (j in abaLinksTypes.indices) {
+                                   if (abaLinksTypes[j].Name == searchTypeIDSpinner.selectedItem)
+                                        searchTypeID = abaLinksTypes[j].ID
+                              }
 
-                  when (searchTerm) {
-                    "" -> if ((searchTypeID == -1 || searchTypeID == 6) || (searchTypeID != -1 && searchTypeID == itemTypeID)) {
-                      abaLinksListFiltered.add(abaLinksList[i])
+                              when (searchTerm) {
+                                   "" -> if ((searchTypeID == -1 || searchTypeID == 6) || (searchTypeID != -1 && searchTypeID == itemTypeID)) {
+                                              abaLinksListFiltered.add(abaLinksList[i])
+                                         }
+                                   else -> {
+                                        if (itemName != null && itemName.contains(searchTerm) && ((searchTypeID == -1 || searchTypeID == 6) || (searchTypeID != -1 && searchTypeID == itemTypeID)))
+                                             abaLinksListFiltered.add(abaLinksList[i])
+                                        else if (itemURL != null && itemURL.contains(s) && ((searchTypeID == -1 || searchTypeID == 6) || (searchTypeID != -1 && searchTypeID == itemTypeID)))
+                                             abaLinksListFiltered.add(abaLinksList[i])
+                                   }
+                              }
+                         }
+
+                         // Call method that reloads the recycler view with the current data
+                         initRecyclerView(abaLinksListFiltered)
                     }
-                    else -> {
-                      if (itemName != null && itemName.contains(searchTerm) && ((searchTypeID == -1 || searchTypeID == 6) || (searchTypeID != -1 && searchTypeID == itemTypeID))) {
-                        abaLinksListFiltered.add(abaLinksList[i])
-                      } else if (itemURL != null && itemURL.contains(s) && ((searchTypeID == -1 || searchTypeID == 6) || (searchTypeID != -1 && searchTypeID == itemTypeID))) {
-                        abaLinksListFiltered.add(abaLinksList[i])
-                      }
-                    }
-                  }
-                }
+               }
 
-                // Call method that reloads the recycler view with the current data
-                initRecyclerView(abaLinksListFiltered)
-              }
-            }
-
-            override fun afterTextChanged(s: Editable) {}
+               override fun afterTextChanged(s: Editable) {}
           })
      }
 
@@ -215,22 +202,21 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
      override fun onOptionsItemSelected(item: MenuItem): Boolean {
           when (item.itemId) {
-            R.id.action_settings -> { // Settings menu
-              loadSettingsActivity()
-              return true
-            }
-            R.id.action_add -> {
-              var intent = Intent(this, EditActivity::class.java)
+               R.id.action_settings -> { // Settings menu
+                    loadSettingsActivity()
+                    return true
+               }
+               R.id.action_add -> {
+                    var intent = Intent(this, EditActivity::class.java)
 
-              intent.putExtra(applicationContext.packageName + ".IsAdding", true)
-              intent.putExtra(applicationContext.packageName + ".LinkTypes", abaLinksTypes)
-              intent.putExtra(applicationContext.packageName + ".LinkTypeNames", abaLinksTypeNames)
+                    intent.putExtra(applicationContext.packageName + ".IsAdding", true)
+                    intent.putExtra(applicationContext.packageName + ".LinkTypes", abaLinksTypes)
+                    intent.putExtra(applicationContext.packageName + ".LinkTypeNames", abaLinksTypeNames)
 
-              startActivity(intent)
-            }
-            R.id.action_search -> {
-              searchViewIsVisible()
-            }
+                    startActivity(intent)
+               }
+               R.id.action_search ->
+                    searchViewIsVisible()
           }
 
           return super.onOptionsItemSelected(item)
@@ -247,7 +233,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           if (extras != null && extras.getBoolean(getApplicationContext().getPackageName() + ".DarkModeToggled")) {
                finishAndRemoveTask()
 
-               System.exit(0);
+               this.setTheme(if (sharedPreferences.getBoolean("DarkThemeOn", false)) darkMode else lightMode)
+               recreate()
+               //System.exit(0);
 
                return
           }
@@ -326,7 +314,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           abaLinkNames.clear()
 
           for (i in arrayList.indices) {
-               abaLinkNames.add("<A HREF='" + arrayList[i].URL + "'>" + arrayList[i].Name + "</A>")
+               abaLinkNames.add("<A HREF=${arrayList[i].URL}>${arrayList[i].Name}</A>")
 
                // Type names
                for (j in abaLinksTypes.indices) {
@@ -363,37 +351,36 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           val getLinkDataEndpoint = "LinkData.php?task=fetchData"
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
           val request = JsonArrayRequest(Request.Method.GET, abaLinksURL + getLinkDataEndpoint, null,
-            { response ->
-              lateinit var jsonarray: JSONArray
+               { response ->
+                    lateinit var jsonarray: JSONArray
 
-              try {
-                jsonarray = JSONArray(response.toString())
-              } catch (e: JSONException) {
-                e.printStackTrace()
-              }
+                    try {
+                         jsonarray = JSONArray(response.toString())
+                    } catch (e: JSONException) {
+                         e.printStackTrace()
+                    }
 
-              // This is needed so that when the user pulls to refresh, all previous items are removed to avoid duplicates
-              abaLinksList.clear()
+                    // This is needed so that when the user pulls to refresh, all previous items are removed to avoid duplicates
+                    abaLinksList.clear()
 
-              for (i in 0 until jsonarray.length()) {
-                try {
-                  val jsonobject = jsonarray.getJSONObject(i)
+                    for (i in 0 until jsonarray.length()) {
+                         try {
+                              val jsonobject = jsonarray.getJSONObject(i)
 
-                  abaLinksList.add(AbaLink(jsonobject.getString("ID").toInt(), jsonobject.getString("Name"), jsonobject.getString("URL"), jsonobject.getString("TypeID").toInt()))
-                } catch (e: JSONException) {
-                  e.printStackTrace()
-                  alert("An error occurred reading the links. Please check your network connection or the URL in Settings", closeApp = false)
-                }
-              }
+                              abaLinksList.add(AbaLink(jsonobject.getString("ID").toInt(), jsonobject.getString("Name"), jsonobject.getString("URL"), jsonobject.getString("TypeID").toInt()))
+                         } catch (e: JSONException) {
+                              e.printStackTrace()
+                              alert("An error occurred reading the links. Please check your network connection or the URL in Settings", closeApp = false)
+                         }
+                    }
 
-              if (!isRefreshing)
-                initRecyclerView(abaLinksList)
-
-            },
-            {
-              //System.out.println("****** Error response=" + error.toString());
-              alert("An error occurred reading the links. Please check your network connection", closeApp = false)
-            }
+                    if (!isRefreshing)
+                         initRecyclerView(abaLinksList)
+               },
+               {
+                    //System.out.println("****** Error response=" + error.toString());
+                    alert("An error occurred reading the links. Please check your network connection", closeApp = false)
+               }
           )
           requestQueue.add(request)
      }
@@ -402,41 +389,41 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           val getLinkDataEndpoint = "LinkData.php?task=fetchTypes"
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
           val request = JsonArrayRequest(Request.Method.GET, abaLinksURL + getLinkDataEndpoint, null,
-            { response ->
-              lateinit var jsonarray: JSONArray
+               { response ->
+                    lateinit var jsonarray: JSONArray
 
-              try {
-                jsonarray = JSONArray(response.toString())
-              } catch (e: JSONException) {
-                e.printStackTrace()
-              }
+                    try {
+                         jsonarray = JSONArray(response.toString())
+                    } catch (e: JSONException) {
+                         e.printStackTrace()
+                    }
 
-              abaLinksTypes.clear()
-              abaLinksTypeNames.clear()
+                    abaLinksTypes.clear()
+                    abaLinksTypeNames.clear()
 
-              for (i in 0 until jsonarray.length()) {
-                try {
-                  val jsonobject = jsonarray.getJSONObject(i)
+                    for (i in 0 until jsonarray.length()) {
+                         try {
+                              val jsonobject = jsonarray.getJSONObject(i)
 
-                  abaLinksTypes.add(AbaLinkType(jsonobject.getInt("id"), jsonobject.getString("value")))
+                              abaLinksTypes.add(AbaLinkType(jsonobject.getInt("id"), jsonobject.getString("value")))
 
-                  abaLinksTypeNames.add(jsonobject.getString("value"))
-                } catch (e: JSONException) {
-                  e.printStackTrace()
-                }
-              }
+                              abaLinksTypeNames.add(jsonobject.getString("value"))
+                         } catch (e: JSONException) {
+                              e.printStackTrace()
+                         }
+                    }
 
-              // Creating adapter for spinner
-              val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, abaLinksTypeNames)
+                    // Creating adapter for spinner
+                    val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, abaLinksTypeNames)
 
-              // attaching data adapter to spinner
-              searchTypeIDSpinner.adapter = dataAdapter
+                    // attaching data adapter to spinner
+                    searchTypeIDSpinner.adapter = dataAdapter
 
-              loadJSONData()
-            },
-            {
-              alert("An error occurred reading the types. Please check your network connection or the URL in Settings", closeApp = false)
-            }
+                    loadJSONData()
+               },
+               {
+                    alert("An error occurred reading the types. Please check your network connection or the URL in Settings", closeApp = false)
+               }
           )
 
           requestQueue.add(request)
@@ -451,15 +438,15 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
           val request = JsonArrayRequest(
-            Request.Method.GET, abaLinksURL + getLinkDataEndpoint + params, null,
-            { _ ->
-            },
-            {
-              //System.out.println("****** Error response=" + error.toString());
-              alert("An error occurred deleting the link with the error ", closeApp = false)
-            })
+               Request.Method.GET, abaLinksURL + getLinkDataEndpoint + params, null,
+               { _ ->
+               },
+               {
+                    //System.out.println("****** Error response=" + error.toString());
+                    alert("An error occurred deleting the link with the error ", closeApp = false)
+               })
 
-          requestQueue.add(request)
+               requestQueue.add(request)
      }
 
      // Visibility is always toggled
