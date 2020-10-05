@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.android.volley.Request
 import com.android.volley.RequestQueue
-import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.textfield.TextInputLayout
@@ -53,8 +52,6 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           // Spinner click listener
           typeIDSpinner.onItemSelectedListener = this
 
-          deleteLink = findViewById(R.id.deleteLink)
-
           var extras = intent.extras
 
           if (extras != null) {
@@ -75,7 +72,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
                abaLinksTypeNames = extras.getStringArrayList(applicationContext.packageName + ".LinkTypeNames") as ArrayList<String>
 
-               // remove All link type
+               // remove "All" link type
                abaLinksTypeNames.remove("All")
 
                if (isAdding)
@@ -114,45 +111,35 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
      override fun onNothingSelected(p0: AdapterView<*>?) { }
 
-     private fun alert(message: String, closeApp: Boolean,confirmDialog: Boolean = false  ) {
+     private fun alert(message: String, closeApp: Boolean = false) {
           // Display dialog
           val builder = AlertDialog.Builder(this)
-
-          builder.setMessage(message).setCancelable(confirmDialog)
-
-          // When deleting, we need  yes/no cancelable buttons
-          if (confirmDialog) {
-               builder.setNegativeButton("Cancel") { _, _ -> if (closeApp) finish() }
-
-               builder.setPositiveButton("OK") { _, _ ->
-                    val getLinkDataEndpoint = "LinkData.php?task=deleteRow"
-
-                    val params= "&LinkID=${abaLinkItem?.ID}"
-
-                    processData(getLinkDataEndpoint, params)
-
-                    // Go back to main activity after deleting
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-
-                    finish()
-               }
-          } else {
-              builder.setPositiveButton("OK") { _, _ -> if (closeApp) finish() }
-          }
+          builder.setMessage(message).setCancelable(false)
+                 .setPositiveButton("OK") { _, _ -> if (closeApp) finish() }
 
           val alert = builder.create()
 
           alert.show()
      }
 
-     fun deleteLinkClick(v: View) {
-          alert("Are you sure that you want to delete this link ?",closeApp = false,confirmDialog = true)
-     }
-
      fun goBackClick(v: View) {
           val intent = Intent(this, MainActivity::class.java)
           startActivity(intent)
+     }
+
+     private fun processData(getLinkDataEndpoint: String, params: String) {
+          val requestQueue: RequestQueue = Volley.newRequestQueue(this)
+
+          val request = JsonArrayRequest(
+          Request.Method.GET, abaLinksURL + getLinkDataEndpoint + params, null,
+          { _ ->
+          },
+          {
+               //System.out.println("****** Error response=" + error.toString());
+               //alert("An error occurred " + if(!isAdding) "saving" else "adding" + " the link with the error ", false)
+          })
+
+          requestQueue.add(request)
      }
 
      fun saveClick(v: View) {
@@ -212,20 +199,5 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
           val intent = Intent(this, MainActivity::class.java)
           startActivity(intent)
-     }
-
-     private fun processData(getLinkDataEndpoint: String, params: String) {
-          val requestQueue: RequestQueue = Volley.newRequestQueue(this)
-
-          val request = JsonArrayRequest(
-               Request.Method.GET, abaLinksURL + getLinkDataEndpoint + params, null,
-               { _ ->
-               },
-               {
-                    //System.out.println("****** Error response=" + error.toString());
-                    //alert("An error occurred " + if(!isAdding) "saving" else "adding" + " the link with the error ", false)
-               })
-
-          requestQueue.add(request)
      }
 }

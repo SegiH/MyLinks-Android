@@ -21,7 +21,7 @@
           app:layout_constraintTop_toTopOf="parent"
       />
 
-    <ImageView
+    <!--<ImageView
         android:id="@+id/deleteLink"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
         android:clickable="true"
         android:focusable = "false"
         android:onClick="deleteLinkClick"
-        android:src="@drawable/delete" />
+        android:src="@drawable/delete" />-->
 
      <TextView
           android:id="@+id/NameLabel"
