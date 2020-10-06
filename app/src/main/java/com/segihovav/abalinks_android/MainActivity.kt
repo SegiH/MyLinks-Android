@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      private lateinit var sharedPreferences: SharedPreferences
      private lateinit var searchTypeIDSpinner: Spinner
      private lateinit var episodeListView: RecyclerView
-     private val darkMode = R.style.Theme_MaterialComponents_DayNight_DarkActionBar
+     private val darkMode = R.style.Theme_MaterialComponents_DayNight
      private val lightMode = R.style.ThemeOverlay_MaterialComponents
      private var recyclerviewAdapter: RecyclerviewAdapter? = null
      private lateinit var touchListener: RecyclerTouchListener
@@ -233,8 +233,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           if (extras != null && extras.getBoolean(getApplicationContext().getPackageName() + ".DarkModeToggled")) {
                finishAndRemoveTask()
 
-               this.setTheme(if (sharedPreferences.getBoolean("DarkThemeOn", false)) darkMode else lightMode)
-               recreate()
+               //this.setTheme(if (sharedPreferences.getBoolean("DarkThemeOn", false)) darkMode else lightMode)
+
+               //recreate()
                //System.exit(0);
 
                return
@@ -325,11 +326,12 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
           recyclerviewAdapter = RecyclerviewAdapter(this, arrayList as MutableList<AbaLink>, abaLinksTypes)
 
+          recyclerviewAdapter?.setDarkMode(if (sharedPreferences.getBoolean("DarkThemeOn", false)) true else false)
+
           layoutManager = LinearLayoutManager(applicationContext)
 
           episodeListView.layoutManager = layoutManager
           episodeListView.itemAnimator = DefaultItemAnimator()
-
 
           registerForContextMenu(episodeListView)
 

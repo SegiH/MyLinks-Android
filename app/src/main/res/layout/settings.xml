@@ -27,7 +27,7 @@
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:layout_marginTop="25dp"
-         android:text="@string/WTFIndexerURL"
+         android:text="@string/abaLinksURL"
          app:layout_constraintLeft_toLeftOf="parent"
          app:layout_constraintTop_toBottomOf="@id/TitleBar"
     />
@@ -58,8 +58,8 @@
          app:layout_constraintTop_toBottomOf="@id/TitleBar"
          android:layout_marginTop="100dp"
          android:switchPadding = "15dp"
-         android:onClick="darkModeClick"
-         android:visibility="invisible" /><!-- Dark mode messes up Recyclerview and causes it to rendere correctly -->
+         android:onClick="darkModeClick"/>
+         <!--android:visibility="invisible" /> Dark mode messes up Recyclerview and causes it to rendere correctly -->
     />
 
     <Button
