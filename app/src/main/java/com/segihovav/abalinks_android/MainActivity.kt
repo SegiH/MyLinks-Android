@@ -16,10 +16,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.Spinner
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -37,8 +34,6 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 // TO DO
-
-// See if you can figure out a way to not exit the app after togglling dark mode in settings
 class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemSelectedListener {
      private lateinit var abaLinksURL: String
      private val abaLinksList: MutableList<AbaLink> = ArrayList()
@@ -228,23 +223,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      public override fun onResume() {
           super.onResume()
 
-          val extras = intent.extras
-
-          if (extras != null && extras.getBoolean(getApplicationContext().getPackageName() + ".DarkModeToggled")) {
-               finishAndRemoveTask()
-
-               //this.setTheme(if (sharedPreferences.getBoolean("DarkThemeOn", false)) darkMode else lightMode)
-
-               //recreate()
-               //System.exit(0);
-
-               return
-          }
-
-          // When resuming this activity, hide the search field and search type dropdown
-          //if (searchView != null && searchView.visibility == View.VISIBLE)
-          //    searchViewIsVisible()
-
           if (abaLinksURL != "")
                loadTypes()
 
@@ -288,8 +266,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                     processData(getLinkDataEndpoint, params)
 
                     abaLinksList.removeAt(deletingItemIndex)
-
-                    //recyclerviewAdapter?.setAbaLinks(abaLinksList)
 
                     recyclerviewAdapter?.notifyDataSetChanged()
 
@@ -433,6 +409,11 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
      private fun loadSettingsActivity() {
           val intent = Intent(this, SettingsActivity::class.java)
+
+          // When resuming this activity, hide the search field and search type dropdown
+          if (searchView != null && searchView.visibility == View.VISIBLE)
+               searchViewIsVisible()
+
           startActivity(intent)
      }
 

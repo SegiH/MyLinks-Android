@@ -75,12 +75,12 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
      //view ID
      private var fgViewID = 0
      private var bgViewID = 0
-     private val bgViewIDLeft = 0
+     //private val bgViewIDLeft = 0
      private var fadeViews: ArrayList<Int>
      private var mRowClickListener: OnRowClickListener? = null
      private lateinit var mRowLongClickListener: OnRowLongClickListener
      private var mBgClickListener: OnSwipeOptionsClickListener? = null
-     private val mBgClickListenerLeft: OnSwipeOptionsClickListener? = null
+     //private val mBgClickListenerLeft: OnSwipeOptionsClickListener? = null
 
      // user choices
      private var clickable = false
@@ -174,11 +174,11 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
           return this
      }
 
-     fun setSwipeable(value: Boolean): RecyclerTouchListener {
+     /*fun setSwipeable(value: Boolean): RecyclerTouchListener {
           swipeable = value
           if (!value) invalidateSwipeOptions()
           return this
-     }
+     }*/
 
      fun setSwipeOptionViews(vararg viewIds: Int?): RecyclerTouchListener {
           optionViews = ArrayList(asList(*viewIds))
@@ -244,7 +244,7 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
 
      override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
 
-     fun invalidateSwipeOptions() { bgWidth = 1 }
+     //fun invalidateSwipeOptions() { bgWidth = 1 }
 
      /*fun openSwipeOptions(position: Int) {
           if (!swipeable || rView.getChildAt(position) == null || unSwipeableRows.contains(position) || shouldIgnoreAction(position)) return
@@ -326,7 +326,7 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
      }
 
      private fun animateFG(downView: View?, animateType: Animation, duration: Long,mSwipeCloseListener: OnSwipeListener?) {
-          var translateAnimator: ObjectAnimator = ObjectAnimator()
+          var translateAnimator = ObjectAnimator()
 
           if (animateType == Animation.OPEN) {
                translateAnimator = ObjectAnimator.ofFloat(fgView, View.TRANSLATION_X, -bgWidth.toFloat())
@@ -379,9 +379,9 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
                     var child: View
 
                     /*
-                        * check for every child (row) in the recycler view whether the touched co-ordinates belong to that
-                        * respective child and if it does, register that child as the touched view (touchedView)
-                        */
+                    * check for every child (row) in the recycler view whether the touched co-ordinates belong to that
+                    * respective child and if it does, register that child as the touched view (touchedView)
+                    */
                     var i = 0
                     while (i < childCount) {
                          child = rView.getChildAt(i)
@@ -416,10 +416,10 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
                          bgView?.setMinimumHeight(fgView.height)
 
                          /*
-                              * bgVisible is true when the options menu is opened
-                              * This block is to register fgPartialViewClicked status - Partial view is the view that is still
-                              * shown on the screen if the options width is < device width
-                              */
+                         * bgVisible is true when the options menu is opened
+                         * This block is to register fgPartialViewClicked status - Partial view is the view that is still
+                         * shown on the screen if the options width is < device width
+                         */
                          if (bgVisible) {
                               handler.removeCallbacks(mLongPressed)
                               x = motionEvent.rawX.toInt()
@@ -432,11 +432,11 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
                     }
 
                     /*
-                        * If options menu is shown and the touched position is not the same as the row for which the
-                        * options is displayed - close the options menu for the row which is displaying it
-                        * (bgVisibleView and bgVisiblePosition is used for this purpose which registers which view and
-                        * which position has it's options menu opened)
-                        */
+                    * If options menu is shown and the touched position is not the same as the row for which the
+                    * options is displayed - close the options menu for the row which is displaying it
+                    * (bgVisibleView and bgVisiblePosition is used for this purpose which registers which view and
+                    * which position has it's options menu opened)
+                    */
                     x = motionEvent.rawX.toInt()
                     y = motionEvent.rawY.toInt()
                     rView.getHitRect(rect)
@@ -684,9 +684,8 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
                               if (fgView.translationX > 0) fgView.translationX = 0f
 
                               // fades all the fadeViews gradually to 0 alpha as dragged
-                              /*for (viewID : View in fadeViews.indices) {
-                                    touchedView?.findViewById(viewID).setAlpha(1 - (Math.abs(translateAmount) / bgWidth));
-                                    }*/
+                              for (viewID in fadeViews)
+                                   touchedView?.findViewById<View>(viewID).setAlpha(1 - (Math.abs(translateAmount) / bgWidth));
                          }
                          return true
                     }

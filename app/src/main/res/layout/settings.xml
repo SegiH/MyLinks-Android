@@ -49,7 +49,7 @@
          android:maxLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Switch
+    <com.google.android.material.switchmaterial.SwitchMaterial
          android:id="@+id/switchDarkMode"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
@@ -59,8 +59,6 @@
          android:layout_marginTop="100dp"
          android:switchPadding = "15dp"
          android:onClick="darkModeClick"/>
-         <!--android:visibility="invisible" /> Dark mode messes up Recyclerview and causes it to rendere correctly -->
-    />
 
     <Button
          android:id="@+id/saveButton"

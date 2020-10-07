@@ -6,5 +6,12 @@
     <string name="Search">Search</string>
     <string name="save">Save</string>string>
     <string name="goBack">Go Back</string>string>
-    <string name="darkMode">Dark Mode</string>string>
+    <string name="darkMode">Dark Mode</string>
+    <string name="open_in_browser">Open in Browser</string>
+    <string name="edit">Edit</string>
+    <string name="share">Share</string>
+    <string name="delete">Delete</string>
+    <string name="name">Name</string>
+    <string name="url">URL</string>
+    <string name="type">Type</string>string>
 </resources>

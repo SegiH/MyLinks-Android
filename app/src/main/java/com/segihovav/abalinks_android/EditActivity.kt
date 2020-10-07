@@ -27,7 +27,6 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
      private lateinit var Name: TextInputLayout
      private lateinit var URL: TextInputLayout
      private lateinit var typeIDSpinner: Spinner
-     private lateinit var deleteLink: ImageView
 
      override fun onCreate(savedInstanceState: Bundle?) {
           sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
@@ -52,7 +51,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           // Spinner click listener
           typeIDSpinner.onItemSelectedListener = this
 
-          var extras = intent.extras
+          val extras = intent.extras
 
           if (extras != null) {
                try {
@@ -60,9 +59,6 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                          isAdding = true
 
                          titleBar.text = "New link"
-
-                         // Hide delete icon when adding a new link
-                         deleteLink.visibility = View.GONE
                     }
                } catch (e: Exception) {
                     isAdding = false

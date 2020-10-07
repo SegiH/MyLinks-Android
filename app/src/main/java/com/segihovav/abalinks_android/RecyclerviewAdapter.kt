@@ -7,14 +7,17 @@ import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.RecyclerView
 
 class RecyclerviewAdapter internal constructor(private val mContext: Context,private val abaLinks: MutableList<AbaLink>,private val abaLinksTypes: MutableList<AbaLinkType>) : RecyclerView.Adapter<RecyclerviewAdapter.MyViewHolder>() {
      var darkMode: Boolean = false
+     var rowFG: LinearLayout? = null
      override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
           val view: View = LayoutInflater.from(mContext).inflate(R.layout.link_item, parent, false)
+          rowFG=view.findViewById(R.id.rowFG)
           return MyViewHolder(view)
      }
 
@@ -30,15 +33,10 @@ class RecyclerviewAdapter internal constructor(private val mContext: Context,pri
           holder.linkName.text = abaLinkItem.Name
 
           if (darkMode) {
-
+               rowFG?.setBackgroundColor(Color.GRAY)
                //holder.linkName.setBackgroundColor(Color.GRAY)
                //holder.linkInfo.setBackgroundColor(Color.GRAY)
-               //val currRow = findV
-               //mContext.setTheme(R.style.Theme_MaterialComponents_DayNight)
-          }
-
-               //holder.linkName.setBackgroundColor(Color.GRAY)
-          //holder.linkName.setBackgroundColor(Color.RED)
+           }
 
           for (i in abaLinksTypes.indices) {
                if (abaLinksTypes[i].ID == abaLinkItem.TypeID)

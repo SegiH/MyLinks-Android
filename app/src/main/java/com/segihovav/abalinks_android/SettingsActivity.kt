@@ -9,12 +9,13 @@ import android.widget.Switch
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputLayout
 
 class SettingsActivity : AppCompatActivity() {
      private lateinit var abaLinksURL: TextInputLayout
      private lateinit var sharedPreferences: SharedPreferences
-     private lateinit var darkModeCheckbox: Switch
+     private lateinit var darkModeCheckbox: SwitchMaterial
      private val darkMode = R.style.ThemeOverlay_MaterialComponents_Dark
      private val lightMode = R.style.ThemeOverlay_MaterialComponents
      private var darkModeToggled = false
