@@ -2,7 +2,6 @@ package com.segihovav.abalinks_android
 
 import android.os.Parcel
 import android.os.Parcelable
-import java.util.ArrayList
 
 data class AbaLink(var ID: Int, var Name: String?, var URL: String?, var TypeID: Int) : Parcelable {
      constructor(parcel: Parcel) : this(
@@ -34,4 +33,3 @@ data class AbaLink(var ID: Int, var Name: String?, var URL: String?, var TypeID:
           dest.writeInt(TypeID)
      }
 }
-

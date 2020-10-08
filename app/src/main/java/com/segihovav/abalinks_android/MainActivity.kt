@@ -1,13 +1,12 @@
 package com.segihovav.abalinks_android
 
-import android.annotation.SuppressLint
+//import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.net.Uri.*
 import android.os.Bundle
 import android.text.Editable
@@ -411,7 +410,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           val intent = Intent(this, SettingsActivity::class.java)
 
           // When resuming this activity, hide the search field and search type dropdown
-          if (searchView != null && searchView.visibility == View.VISIBLE)
+          if (searchView.visibility == View.VISIBLE)
                searchViewIsVisible()
 
           startActivity(intent)
@@ -458,7 +457,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      // Supresses warning about the class property
      companion object {
           @JvmField
-          @SuppressLint("StaticFieldLeak")
+          //@SuppressLint("StaticFieldLeak")
           var context: Context? = null
      }
 }

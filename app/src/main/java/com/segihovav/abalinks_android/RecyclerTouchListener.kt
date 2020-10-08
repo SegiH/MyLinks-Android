@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator
 import android.app.Activity
 import android.graphics.Rect
 import android.os.Handler
+import android.os.Looper
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.MotionEvent
@@ -22,7 +23,7 @@ import kotlin.collections.ArrayList
 import kotlin.math.abs
 
 class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnItemTouchListener, com.segihovav.abalinks_android.OnActivityTouchListener {
-     private val handler = Handler()
+     private val handler = Handler(Looper.getMainLooper())
      private var unSwipeableRows: List<Int>
 
      /*
@@ -169,7 +170,10 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
           mBgClickListener = listener
           if (act is RecyclerTouchListenerHelper) (act as RecyclerTouchListenerHelper).setOnActivityTouchListener(this)
           val displaymetrics = DisplayMetrics()
-          act.windowManager.defaultDisplay.getMetrics(displaymetrics)
+
+          // This line seems to be important for the recyclerview swiping action
+          //act.windowManager.defaultDisplay.getMetrics(displaymetrics)
+
           screenHeight = displaymetrics.heightPixels
           return this
      }
@@ -437,8 +441,6 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
                     * (bgVisibleView and bgVisiblePosition is used for this purpose which registers which view and
                     * which position has it's options menu opened)
                     */
-                    x = motionEvent.rawX.toInt()
-                    y = motionEvent.rawY.toInt()
                     rView.getHitRect(rect)
 
                     if (swipeable && bgVisible && touchedPosition != bgVisiblePosition) {
@@ -685,7 +687,7 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
 
                               // fades all the fadeViews gradually to 0 alpha as dragged
                               for (viewID in fadeViews)
-                                   touchedView?.findViewById<View>(viewID).setAlpha(1 - (Math.abs(translateAmount) / bgWidth));
+                                   touchedView.findViewById<View>(viewID).setAlpha(1 - (Math.abs(translateAmount) / bgWidth));
                          }
                          return true
                     }
