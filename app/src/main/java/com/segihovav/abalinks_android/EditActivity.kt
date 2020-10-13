@@ -132,7 +132,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           },
           {
                //System.out.println("****** Error response=" + error.toString());
-               //alert("An error occurred " + if(!isAdding) "saving" else "adding" + " the link with the error ", false)
+               alert("An error occurred " + if(!isAdding) "saving" else "adding" + " the link with the error " + it.toString(), false)
           })
 
           requestQueue.add(request)

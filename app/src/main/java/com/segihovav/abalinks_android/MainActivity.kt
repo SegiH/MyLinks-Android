@@ -46,6 +46,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      private val lightMode = R.style.ThemeOverlay_MaterialComponents
      private var recyclerviewAdapter: RecyclerviewAdapter? = null
      private lateinit var touchListener: RecyclerTouchListener
+     private val getLinksDataEndpoint = "LinkData.php?task=fetchData"
+     private val getTypesDataEndpoint = "LinkData.php?task=fetchTypes"
 
      override fun onCreate(savedInstanceState: Bundle?) {
           sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
@@ -68,7 +70,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           // init swipe listener
           mSwipeRefreshLayout.setOnRefreshListener(this)
           mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary, android.R.color.holo_green_dark, android.R.color.holo_orange_dark, android.R.color.holo_blue_dark)
-          mSwipeRefreshLayout.setOnRefreshListener { loadJSONData(true); searchView.text = searchView.text }
+          mSwipeRefreshLayout.setOnRefreshListener { readJSONData("Links",getLinksDataEndpoint,::parseLinksJSON,true); searchView.text = searchView.text }
 
           episodeListView = findViewById(R.id.episodeList)
 
@@ -184,7 +186,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      override fun onConfigurationChanged(newConfig: Configuration) {
           super.onConfigurationChanged(newConfig)
 
-           if (episodeListView.adapter != null) episodeListView.adapter?.notifyDataSetChanged()
+           if (episodeListView.adapter != null)
+                episodeListView.adapter?.notifyDataSetChanged()
      }
 
      override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
@@ -200,7 +203,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                     loadSettingsActivity()
                     return true
                }
-               R.id.action_add -> {
+               R.id.action_add -> { // Add menu
                     var intent = Intent(this, EditActivity::class.java)
 
                     intent.putExtra(applicationContext.packageName + ".IsAdding", true)
@@ -209,7 +212,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
                     startActivity(intent)
                }
-               R.id.action_search ->
+               R.id.action_search -> // Search menu
                     searchViewIsVisible()
           }
 
@@ -223,7 +226,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           super.onResume()
 
           if (abaLinksURL != "")
-               loadTypes()
+               readJSONData("Types",getTypesDataEndpoint,::parseTypesJSON)
 
           if (episodeListView.adapter != null) episodeListView.adapter?.notifyDataSetChanged()
      }
@@ -241,28 +244,41 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                abaLinksURL+="/"
 
           if (abaLinksTypes.size == 0 && abaLinksURL != "")
-               loadTypes()
+               readJSONData("Types",getTypesDataEndpoint,::parseTypesJSON)
      }
 
      public override fun onStop() {
           super.onStop()
      }
 
-     private fun alert(message: String, closeApp: Boolean, confirmDialog: Boolean = false, deletingItemIndex: Int = 0) {
+     private fun alert(message: String, closeApp: Boolean, confirmDialog: Boolean = false, deletingItemIndex: Int = -1) {
           val builder = AlertDialog.Builder(this)
 
           builder.setMessage(message).setCancelable(confirmDialog)
 
           // When deleting, we need  yes/no cancelable buttons
-          if (confirmDialog) {
+          if (confirmDialog && deletingItemIndex != -1) {
                builder.setNegativeButton("Cancel") { _, _ -> if (closeApp) finish() }
 
                builder.setPositiveButton("OK") { _, _ ->
-                    val getLinkDataEndpoint = "LinkData.php?task=deleteRow"
+                    val deleteLinkDataEndpoint = "LinkData.php?task=deleteRow"
 
                     val params= "&LinkID=${abaLinksList[deletingItemIndex].ID}"
 
-                    processData(getLinkDataEndpoint, params)
+                    //processData(getLinkDataEndpoint, params)
+
+                    val requestQueue: RequestQueue = Volley.newRequestQueue(this)
+
+                    val request = JsonArrayRequest(
+                            Request.Method.GET, abaLinksURL + deleteLinkDataEndpoint + params, null,
+                            { _ ->
+                            },
+                            {
+                                 //System.out.println("****** Error response=" + error.toString());
+                                 //alert("An error occurred deleting the link with the error ", closeApp = false)
+                            })
+
+                    requestQueue.add(request)
 
                     abaLinksList.removeAt(deletingItemIndex)
 
@@ -270,7 +286,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
                     alert("Item has been deleted", closeApp = false)
                }
-          } else {
+          } else { // informational alert only
                builder.setPositiveButton("OK") { _, _ -> if (closeApp) finish() }
           }
 
@@ -324,88 +340,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           }
      }
 
-     private fun loadJSONData(isRefreshing: Boolean = false) {
-          val getLinkDataEndpoint = "LinkData.php?task=fetchData"
-          val requestQueue: RequestQueue = Volley.newRequestQueue(this)
-          val request = JsonArrayRequest(Request.Method.GET, abaLinksURL + getLinkDataEndpoint, null,
-               { response ->
-                    lateinit var jsonarray: JSONArray
-
-                    try {
-                         jsonarray = JSONArray(response.toString())
-                    } catch (e: JSONException) {
-                         e.printStackTrace()
-                    }
-
-                    // This is needed so that when the user pulls to refresh, all previous items are removed to avoid duplicates
-                    abaLinksList.clear()
-
-                    for (i in 0 until jsonarray.length()) {
-                         try {
-                              val jsonobject = jsonarray.getJSONObject(i)
-
-                              abaLinksList.add(AbaLink(jsonobject.getString("ID").toInt(), jsonobject.getString("Name"), jsonobject.getString("URL"), jsonobject.getString("TypeID").toInt()))
-                         } catch (e: JSONException) {
-                              e.printStackTrace()
-                              alert("An error occurred reading the links. Please check your network connection or the URL in Settings", closeApp = false)
-                         }
-                    }
-
-                    if (!isRefreshing)
-                         initRecyclerView(abaLinksList)
-               },
-               {
-                    //System.out.println("****** Error response=" + error.toString());
-                    alert("An error occurred reading the links. Please check your network connection", closeApp = false)
-               }
-          )
-          requestQueue.add(request)
-     }
-
-     private fun loadTypes() {
-          val getLinkDataEndpoint = "LinkData.php?task=fetchTypes"
-          val requestQueue: RequestQueue = Volley.newRequestQueue(this)
-          val request = JsonArrayRequest(Request.Method.GET, abaLinksURL + getLinkDataEndpoint, null,
-               { response ->
-                    lateinit var jsonarray: JSONArray
-
-                    try {
-                         jsonarray = JSONArray(response.toString())
-                    } catch (e: JSONException) {
-                         e.printStackTrace()
-                    }
-
-                    abaLinksTypes.clear()
-                    abaLinksTypeNames.clear()
-
-                    for (i in 0 until jsonarray.length()) {
-                         try {
-                              val jsonobject = jsonarray.getJSONObject(i)
-
-                              abaLinksTypes.add(AbaLinkType(jsonobject.getInt("id"), jsonobject.getString("value")))
-
-                              abaLinksTypeNames.add(jsonobject.getString("value"))
-                         } catch (e: JSONException) {
-                              e.printStackTrace()
-                         }
-                    }
-
-                    // Creating adapter for spinner
-                    val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, abaLinksTypeNames)
-
-                    // attaching data adapter to spinner
-                    searchTypeIDSpinner.adapter = dataAdapter
-
-                    loadJSONData()
-               },
-               {
-                    alert("An error occurred reading the types. Please check your network connection or the URL in Settings", closeApp = false)
-               }
-          )
-
-          requestQueue.add(request)
-     }
-
      private fun loadSettingsActivity() {
           val intent = Intent(this, SettingsActivity::class.java)
 
@@ -416,23 +350,77 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           startActivity(intent)
      }
 
-     private fun processData(getLinkDataEndpoint: String, params: String) {
+     private fun parseLinksJSON(JSONData: JSONArray,isRefreshing: Boolean = false) {
+          // This is needed so that when the user pulls to refresh, all previous items are removed to avoid duplicates
+          abaLinksList.clear()
+
+          for (i in 0 until JSONData.length()) {
+               try {
+                    val jsonobject = JSONData.getJSONObject(i)
+
+                    abaLinksList.add(AbaLink(jsonobject.getString("ID").toInt(), jsonobject.getString("Name"), jsonobject.getString("URL"), jsonobject.getString("TypeID").toInt()))
+               } catch (e: JSONException) {
+                    e.printStackTrace()
+                    alert("An error occurred reading the links. Please check your network connection or the URL in Settings", closeApp = false)
+               }
+          }
+
+          if (!isRefreshing)
+               initRecyclerView(abaLinksList)
+     }
+
+     private fun parseTypesJSON(JSONData: JSONArray,isRefreshing: Boolean = false) {
+          abaLinksTypes.clear()
+          abaLinksTypeNames.clear()
+
+          for (i in 0 until JSONData.length()) {
+               try {
+                    val jsonobject = JSONData.getJSONObject(i)
+
+                    abaLinksTypes.add(AbaLinkType(jsonobject.getInt("id"), jsonobject.getString("value")))
+
+                    abaLinksTypeNames.add(jsonobject.getString("value"))
+               } catch (e: JSONException) {
+                    e.printStackTrace()
+               }
+          }
+
+          // Creating adapter for spinner
+          val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, abaLinksTypeNames)
+
+          // attaching data adapter to spinner
+          searchTypeIDSpinner.adapter = dataAdapter
+
+          readJSONData("Links",getLinksDataEndpoint,::parseLinksJSON,isRefreshing)
+     }
+
+     // Read JSON from specific endpoint and call the specified callback after it has been fetched
+     private fun readJSONData(dataType: String, endpoint: String, JSONCallback: (JSONData: JSONArray, isRefreshing: Boolean) -> Unit, isRefreshing: Boolean = false) {
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
-          val request = JsonArrayRequest(
-               Request.Method.GET, abaLinksURL + getLinkDataEndpoint + params, null,
-               { _ ->
-               },
-               {
-                    //System.out.println("****** Error response=" + error.toString());
-                    alert("An error occurred deleting the link with the error ", closeApp = false)
-               })
+          val request = JsonArrayRequest(Request.Method.GET, abaLinksURL + endpoint, null,
+                  { response ->
+                       var jsonarray: JSONArray = JSONArray()
 
-               requestQueue.add(request)
+                       try {
+                            jsonarray = JSONArray(response.toString())
+                       } catch (e: JSONException) {
+                            e.printStackTrace()
+                       }
+
+                       JSONCallback(jsonarray,isRefreshing)
+                  },
+                  {
+                       //System.out.println("****** Error response=" + error.toString());
+                       alert("An error occurred reading the $dataType with the error $it. Please check your network connection", closeApp = false)
+                  }
+          )
+          requestQueue.add(request)
+
      }
 
      // Visibility is always toggled
-     fun searchViewIsVisible() {
+     private fun searchViewIsVisible() {
           val swipeControl = findViewById<SwipeRefreshLayout>(R.id.swipe_container)
 
           val isHidden= searchView.visibility != View.VISIBLE
