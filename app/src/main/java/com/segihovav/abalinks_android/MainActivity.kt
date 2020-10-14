@@ -1,10 +1,8 @@
 package com.segihovav.abalinks_android
 
-//import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.net.Uri.*
@@ -34,34 +32,25 @@ import kotlin.collections.ArrayList
 
 // TO DO
 class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemSelectedListener {
-     private lateinit var abaLinksURL: String
      private val abaLinksList: MutableList<AbaLink> = ArrayList()
-     private var abaLinksTypes: ArrayList<AbaLinkType> = ArrayList()
-     private val abaLinksTypeNames: java.util.ArrayList<String> = java.util.ArrayList()
      private lateinit var searchView: EditText
-     private lateinit var sharedPreferences: SharedPreferences
      private lateinit var searchTypeIDSpinner: Spinner
      private lateinit var episodeListView: RecyclerView
-     private val darkMode = R.style.Theme_MaterialComponents_DayNight
-     private val lightMode = R.style.ThemeOverlay_MaterialComponents
      private var recyclerviewAdapter: RecyclerviewAdapter? = null
      private lateinit var touchListener: RecyclerTouchListener
      private val getLinksDataEndpoint = "LinkData.php?task=fetchData"
      private val getTypesDataEndpoint = "LinkData.php?task=fetchTypes"
 
      override fun onCreate(savedInstanceState: Bundle?) {
-          sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+          DataService.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
-          this.setTheme(if (sharedPreferences.getBoolean("DarkThemeOn", false)) darkMode else lightMode)
+          this.setTheme(if (DataService.sharedPreferences.getBoolean("DarkThemeOn", false)) DataService.darkMode else DataService.lightMode)
 
           super.onCreate(savedInstanceState)
           setContentView(R.layout.activity_main)
 
-          // Set context which is used by SwipeController
-          context = applicationContext
-
           // Internet connection is always required
-          if (!isNetworkAvailable(this))
+          if (!isNetworkAvailable())
                alert("No Internet connection detected. Internet access is needed to use this app.", closeApp = true)
 
           // Init the SwipeController
@@ -74,13 +63,13 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
           episodeListView = findViewById(R.id.episodeList)
 
-          abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != null) sharedPreferences.getString("AbaLinksURL", "").toString() else ""
+          DataService.AbaLinksURL=if (DataService.sharedPreferences.getString("AbaLinksURL", "") != null) DataService.sharedPreferences.getString("AbaLinksURL", "").toString() else ""
 
           // Make sure that abaLinksURL always ends in a black slash
-          if (abaLinksURL != "" && !abaLinksURL.endsWith("/"))
-               abaLinksURL+="/"
+          if (DataService.AbaLinksURL != "" && !DataService.AbaLinksURL.endsWith("/"))
+               DataService.AbaLinksURL+="/"
 
-          if (abaLinksURL == "")
+          if (DataService.AbaLinksURL == "")
                loadSettingsActivity()
 
           touchListener = RecyclerTouchListener(this, episodeListView)
@@ -98,11 +87,11 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                     when (viewID) {
                          R.id.delete_link -> alert("Are you sure that you want to delete this link ?", closeApp = false, confirmDialog = true, deletingItemIndex = position)
                          R.id.edit_link -> {
-                              val intent = Intent(context, EditActivity::class.java)
+                              val intent = Intent(applicationContext, EditActivity::class.java)
 
                               intent.putExtra(applicationContext.packageName + ".LinkItem", abaLinksList[position])
-                              intent.putExtra(applicationContext.packageName + ".LinkTypes", abaLinksTypes)
-                              intent.putExtra(applicationContext.packageName + ".LinkTypeNames", abaLinksTypeNames)
+                              //intent.putExtra(applicationContext.packageName + ".LinkTypes", abaLinksTypes)
+                              //intent.putExtra(applicationContext.packageName + ".LinkTypeNames", abaLinksTypeNames)
 
                               startActivity(intent)
                          }
@@ -145,9 +134,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                               val searchTerm = s.toString().toLowerCase(Locale.ROOT)
                               var searchTypeID = -1
 
-                              for (j in abaLinksTypes.indices) {
-                                   if (abaLinksTypes[j].Name == searchTypeIDSpinner.selectedItem)
-                                        searchTypeID = abaLinksTypes[j].ID
+                              for (j in DataService.abaLinksTypes.indices) {
+                                   if (DataService.abaLinksTypes[j].Name == searchTypeIDSpinner.selectedItem)
+                                        searchTypeID = DataService.abaLinksTypes[j].ID
                               }
 
                               when (searchTerm) {
@@ -207,8 +196,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                     var intent = Intent(this, EditActivity::class.java)
 
                     intent.putExtra(applicationContext.packageName + ".IsAdding", true)
-                    intent.putExtra(applicationContext.packageName + ".LinkTypes", abaLinksTypes)
-                    intent.putExtra(applicationContext.packageName + ".LinkTypeNames", abaLinksTypeNames)
+                    //intent.putExtra(applicationContext.packageName + ".LinkTypes", abaLinksTypes)
+                    //intent.putExtra(applicationContext.packageName + ".LinkTypeNames", abaLinksTypeNames)
 
                     startActivity(intent)
                }
@@ -225,7 +214,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      public override fun onResume() {
           super.onResume()
 
-          if (abaLinksURL != "")
+          if (DataService.AbaLinksURL != "")
                readJSONData("Types",getTypesDataEndpoint,::parseTypesJSON)
 
           if (episodeListView.adapter != null) episodeListView.adapter?.notifyDataSetChanged()
@@ -237,13 +226,10 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
           val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
-          // Since onCreate() doesn't get called when returning from another activity, we have to set AbaLinksURL here
-          abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != null) sharedPreferences.getString("AbaLinksURL", "").toString() else ""
+          if (DataService.AbaLinksURL != "" && !DataService.AbaLinksURL.endsWith("/"))
+               DataService.AbaLinksURL+="/"
 
-          if (abaLinksURL != "" && !abaLinksURL.endsWith("/"))
-               abaLinksURL+="/"
-
-          if (abaLinksTypes.size == 0 && abaLinksURL != "")
+          if (DataService.abaLinksTypes.size == 0 && DataService.AbaLinksURL != "")
                readJSONData("Types",getTypesDataEndpoint,::parseTypesJSON)
      }
 
@@ -270,7 +256,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                     val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
                     val request = JsonArrayRequest(
-                            Request.Method.GET, abaLinksURL + deleteLinkDataEndpoint + params, null,
+                            Request.Method.GET, DataService.AbaLinksURL + deleteLinkDataEndpoint + params, null,
                             { _ ->
                             },
                             {
@@ -297,7 +283,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
      private fun initRecyclerView(arrayList: List<AbaLink>) {
           val abaLinkNames: MutableList<String>
-          val abaLinkTypeNames: MutableList<String> = ArrayList() // Used to save the typw
           val layoutManager: RecyclerView.LayoutManager
           val mSwipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.swipe_container)
 
@@ -305,19 +290,12 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           abaLinkNames = ArrayList()
           abaLinkNames.clear()
 
-          for (i in arrayList.indices) {
+          for (i in arrayList.indices)
                abaLinkNames.add("<A HREF=${arrayList[i].URL}>${arrayList[i].Name}</A>")
 
-               // Type names
-               for (j in abaLinksTypes.indices) {
-                    if (abaLinksTypes[j].ID==arrayList[i].TypeID && abaLinksTypes[j].Name != "")
-                         abaLinkTypeNames.add(abaLinksTypes[j].Name.toString())
-               }
-          }
+          recyclerviewAdapter = RecyclerviewAdapter(this, arrayList as MutableList<AbaLink>, DataService.abaLinksTypes)
 
-          recyclerviewAdapter = RecyclerviewAdapter(this, arrayList as MutableList<AbaLink>, abaLinksTypes)
-
-          recyclerviewAdapter?.setDarkMode(if (sharedPreferences.getBoolean("DarkThemeOn", false)) true else false)
+          recyclerviewAdapter?.setDarkMode(if (DataService.sharedPreferences.getBoolean("DarkThemeOn", false)) true else false)
 
           layoutManager = LinearLayoutManager(applicationContext)
 
@@ -331,9 +309,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           episodeListView.setAdapter(recyclerviewAdapter)
      }
 
-     private fun isNetworkAvailable(context: Context): Boolean {
+     private fun isNetworkAvailable(): Boolean {
           return try {
-               val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+               val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                     connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork) != null
           } catch (e: Exception) {
                false
@@ -370,23 +348,23 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      }
 
      private fun parseTypesJSON(JSONData: JSONArray,isRefreshing: Boolean = false) {
-          abaLinksTypes.clear()
-          abaLinksTypeNames.clear()
+          DataService.abaLinksTypes.clear()
+          DataService.abaLinksTypeNames.clear()
 
           for (i in 0 until JSONData.length()) {
                try {
                     val jsonobject = JSONData.getJSONObject(i)
 
-                    abaLinksTypes.add(AbaLinkType(jsonobject.getInt("id"), jsonobject.getString("value")))
+                    DataService.abaLinksTypes.add(AbaLinkType(jsonobject.getInt("id"), jsonobject.getString("value")))
 
-                    abaLinksTypeNames.add(jsonobject.getString("value"))
+                    DataService.abaLinksTypeNames.add(jsonobject.getString("value"))
                } catch (e: JSONException) {
                     e.printStackTrace()
                }
           }
 
           // Creating adapter for spinner
-          val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, abaLinksTypeNames)
+          val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, DataService.abaLinksTypeNames)
 
           // attaching data adapter to spinner
           searchTypeIDSpinner.adapter = dataAdapter
@@ -398,7 +376,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      private fun readJSONData(dataType: String, endpoint: String, JSONCallback: (JSONData: JSONArray, isRefreshing: Boolean) -> Unit, isRefreshing: Boolean = false) {
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
-          val request = JsonArrayRequest(Request.Method.GET, abaLinksURL + endpoint, null,
+          val request = JsonArrayRequest(Request.Method.GET, DataService.AbaLinksURL + endpoint, null,
                   { response ->
                        var jsonarray: JSONArray = JSONArray()
 
@@ -440,12 +418,5 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           }
 
           swipeControl.layoutParams=params
-     }
-
-     // Supresses warning about the class property
-     companion object {
-          @JvmField
-          //@SuppressLint("StaticFieldLeak")
-          var context: Context? = null
      }
 }

@@ -2,7 +2,6 @@ package com.segihovav.abalinks_android
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -13,15 +12,12 @@ import com.google.android.material.textfield.TextInputLayout
 
 class SettingsActivity : AppCompatActivity() {
      private lateinit var abaLinksURL: TextInputLayout
-     private lateinit var sharedPreferences: SharedPreferences
      private lateinit var darkModeCheckbox: SwitchMaterial
-     private val darkMode = R.style.ThemeOverlay_MaterialComponents_Dark
-     private val lightMode = R.style.ThemeOverlay_MaterialComponents
      private var darkModeToggled = false
 
      override fun onCreate(savedInstanceState: Bundle?) {
-          sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-          this.setTheme(if (sharedPreferences.getBoolean("DarkThemeOn", false)) darkMode else lightMode)
+          DataService.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+          this.setTheme(if (DataService.sharedPreferences.getBoolean("DarkThemeOn", false)) DataService.darkMode else DataService.lightMode)
 
           super.onCreate(savedInstanceState)
           setContentView(R.layout.settings)
@@ -29,13 +25,13 @@ class SettingsActivity : AppCompatActivity() {
           darkModeCheckbox = findViewById(R.id.switchDarkMode)
           abaLinksURL = findViewById(R.id.URL)
 
-          if (sharedPreferences.getString("AbaLinksURL", "") != "") {
-               abaLinksURL.editText?.setText(sharedPreferences.getString("AbaLinksURL", ""))
+          if (DataService.sharedPreferences.getString("AbaLinksURL", "") != "") {
+               abaLinksURL.editText?.setText(DataService.sharedPreferences.getString("AbaLinksURL", ""))
           } else {
                alert("Please enter the URL of your instance of AbaLinks", false)
           }
 
-          darkModeCheckbox.isChecked = sharedPreferences.getBoolean("DarkThemeOn", false)
+          darkModeCheckbox.isChecked = DataService.sharedPreferences.getBoolean("DarkThemeOn", false)
      }
 
      private fun alert(message: String, closeApp: Boolean) {
@@ -65,7 +61,7 @@ class SettingsActivity : AppCompatActivity() {
                Toast.makeText(applicationContext, "Please enter the URL", Toast.LENGTH_LONG).show()
                return
           }
-          val editor = sharedPreferences.edit()
+          val editor = DataService.sharedPreferences.edit()
           editor.putString("AbaLinksURL", abaLinksURL.editText?.text.toString())
           editor.putBoolean("DarkThemeOn", darkModeCheckbox.isChecked)
           editor.apply()

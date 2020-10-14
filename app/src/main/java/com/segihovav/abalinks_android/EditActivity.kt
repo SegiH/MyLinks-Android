@@ -2,7 +2,6 @@ package com.segihovav.abalinks_android
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.*
@@ -13,32 +12,25 @@ import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.textfield.TextInputLayout
-import java.util.*
 
 class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
-     private lateinit var sharedPreferences: SharedPreferences
-     private val darkMode = R.style.Theme_AppCompat_DayNight
-     private val lightMode = R.style.ThemeOverlay_MaterialComponents
      private var abaLinkItem: AbaLink? = null
-     private lateinit var abaLinksTypes: ArrayList<AbaLinkType>
-     private lateinit var abaLinksTypeNames: ArrayList<String>
-     private lateinit var abaLinksURL: String
      private var isAdding: Boolean = false
      private lateinit var Name: TextInputLayout
      private lateinit var URL: TextInputLayout
      private lateinit var typeIDSpinner: Spinner
 
      override fun onCreate(savedInstanceState: Bundle?) {
-          sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-          this.setTheme(if (sharedPreferences.getBoolean("DarkThemeOn", false)) darkMode else lightMode)
+          DataService.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+          this.setTheme(if (DataService.sharedPreferences.getBoolean("DarkThemeOn", false)) DataService.darkMode else DataService.lightMode)
 
           super.onCreate(savedInstanceState)
           setContentView(R.layout.editactivity)
 
-          abaLinksURL = if (sharedPreferences.getString("AbaLinksURL", "") != null) sharedPreferences.getString("AbaLinksURL", "").toString() else ""
+          DataService.AbaLinksURL = if (DataService.sharedPreferences.getString("AbaLinksURL", "") != null) DataService.sharedPreferences.getString("AbaLinksURL", "").toString() else ""
 
-          if (abaLinksURL != "" && !abaLinksURL.endsWith("/"))
-               abaLinksURL+="/"
+          if (DataService.AbaLinksURL != "" && !DataService.AbaLinksURL.endsWith("/"))
+               DataService.AbaLinksURL+="/"
 
           val titleBar=findViewById<TextView>(R.id.TitleBar)
 
@@ -65,18 +57,18 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                     isAdding = false
                }
 
-               abaLinksTypes = extras.getParcelableArrayList<AbaLinkType>(applicationContext.packageName + ".LinkTypes") as ArrayList<AbaLinkType>
+               //DataService.abaLinksTypes = extras.getParcelableArrayList<AbaLinkType>(applicationContext.packageName + ".LinkTypes") as ArrayList<AbaLinkType>
 
-               abaLinksTypeNames = extras.getStringArrayList(applicationContext.packageName + ".LinkTypeNames") as ArrayList<String>
+               //DataService.abaLinksTypeNames = extras.getStringArrayList(applicationContext.packageName + ".LinkTypeNames") as ArrayList<String>
 
                // remove "All" link type
-               abaLinksTypeNames.remove("All")
+               DataService.abaLinksTypeNames.remove("All")
 
                if (isAdding)
-                    abaLinksTypeNames.add(0,"")
+                    DataService.abaLinksTypeNames.add(0,"")
 
                // Creating adapter for spinner - For some reason when adding, we need to use android.R.layout.simple_spinner_item when adding or the TypeID spinner items will have too large of a gap between each item
-               val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, abaLinksTypeNames)
+               val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, DataService.abaLinksTypeNames)
 
                // attaching data adapter to spinner
                typeIDSpinner.adapter = dataAdapter
@@ -91,10 +83,10 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
                    URL.editText?.setText(abaLinkItem?.URL)
 
-                   for (i in abaLinksTypes.indices) {
-                       if (abaLinksTypes[i].ID == abaLinkItem?.TypeID) {
-                           for (j in abaLinksTypeNames.indices) {
-                                if (abaLinksTypeNames[j] == abaLinksTypes[i].Name) {
+                   for (i in DataService.abaLinksTypes.indices) {
+                       if (DataService.abaLinksTypes[i].ID == abaLinkItem?.TypeID) {
+                           for (j in DataService.abaLinksTypeNames.indices) {
+                                if (DataService.abaLinksTypeNames[j] == DataService.abaLinksTypes[i].Name) {
                                      typeIDSpinner.setSelection(j)
                                 }
                            }
@@ -128,7 +120,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
           val request = JsonArrayRequest(
-          Request.Method.GET, abaLinksURL + getLinkDataEndpoint + params, null,
+          Request.Method.GET, DataService.AbaLinksURL + getLinkDataEndpoint + params, null,
           { _ ->
           },
           {
@@ -177,11 +169,11 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                params="&rowID=${this.abaLinkItem?.ID}&columnName=URL&columnValue=${url}"
                processData(getLinkDataEndpoint, params)
 
-               for (i in abaLinksTypes.indices) {
-                    val linkTypeName=if (abaLinksTypes[i].Name != null) abaLinksTypes[i].Name else ""
+               for (i in DataService.abaLinksTypes.indices) {
+                    val linkTypeName=if (DataService.abaLinksTypes[i].Name != null) DataService.abaLinksTypes[i].Name else ""
 
                     if (linkTypeName == typeIDSpinner.selectedItem) {
-                         params="&rowID=${this.abaLinkItem?.ID}&columnName=TypeID&columnValue=${abaLinksTypes[i].ID}"
+                         params="&rowID=${this.abaLinkItem?.ID}&columnName=TypeID&columnValue=${DataService.abaLinksTypes[i].ID}"
                          processData(getLinkDataEndpoint, params)
                     }
                }
