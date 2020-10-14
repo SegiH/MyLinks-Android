@@ -51,6 +51,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           // Spinner click listener
           typeIDSpinner.onItemSelectedListener = this
 
+          // Get Intent data
           val extras = intent.extras
 
           if (extras != null) {
@@ -177,14 +178,13 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                processData(getLinkDataEndpoint, params)
 
                for (i in abaLinksTypes.indices) {
-                    val linkTypeName= if (abaLinksTypes[i].Name != null) abaLinksTypes[i].Name else ""
+                    val linkTypeName=if (abaLinksTypes[i].Name != null) abaLinksTypes[i].Name else ""
 
                     if (linkTypeName == typeIDSpinner.selectedItem) {
                          params="&rowID=${this.abaLinkItem?.ID}&columnName=TypeID&columnValue=${abaLinksTypes[i].ID}"
                          processData(getLinkDataEndpoint, params)
                     }
                }
-
           } else { // Save new item
                getLinkDataEndpoint = "LinkData.php?task=insertRow"
 

@@ -24,19 +24,10 @@ class RecyclerviewAdapter internal constructor(private val mContext: Context,pri
      override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
           val abaLinkItem: AbaLink = abaLinks[position]
 
-          /*if (abaLinkItem.URL != null && (abaLinkItem.URL.toString().contains("http") || abaLinkItem.URL.toString().contains("https"))) {
-               holder.linkName.text = Html.fromHtml("<A HREF=${abaLinks[position].URL}>${abaLinks[position].Name}</A>", HtmlCompat.FROM_HTML_MODE_LEGACY)
-               holder.linkName.movementMethod = LinkMovementMethod.getInstance()
-          } else {
-              holder.linkName.text = abaLinkItem.Name
-          }*/
           holder.linkName.text = abaLinkItem.Name
 
-          if (darkMode) {
+          if (darkMode)
                rowFG?.setBackgroundColor(Color.GRAY)
-               //holder.linkName.setBackgroundColor(Color.GRAY)
-               //holder.linkInfo.setBackgroundColor(Color.GRAY)
-           }
 
           for (i in abaLinksTypes.indices) {
                if (abaLinksTypes[i].ID == abaLinkItem.TypeID)
