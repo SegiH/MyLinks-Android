@@ -1,6 +1,5 @@
 package com.segihovav.abalinks_android
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -28,22 +27,10 @@ class SettingsActivity : AppCompatActivity() {
           if (DataService.sharedPreferences.getString("AbaLinksURL", "") != "") {
                abaLinksURL.editText?.setText(DataService.sharedPreferences.getString("AbaLinksURL", ""))
           } else {
-               alert("Please enter the URL of your instance of AbaLinks", false)
+               DataService.alert(androidx.appcompat.app.AlertDialog.Builder(this), message="Please enter the name",finish={ finish() },OKCallback = null)
           }
 
           darkModeCheckbox.isChecked = DataService.sharedPreferences.getBoolean("DarkThemeOn", false)
-     }
-
-     private fun alert(message: String, closeApp: Boolean) {
-          // Display dialog
-          val builder = AlertDialog.Builder(this)
-
-          builder.setMessage(message).setCancelable(false)
-                 .setPositiveButton("OK") { _, _ -> if (closeApp) finish() }
-
-          val alert = builder.create()
-
-          alert.show()
      }
 
      fun darkModeClick(v: View?) {

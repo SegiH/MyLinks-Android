@@ -1,6 +1,5 @@
 package com.segihovav.abalinks_android
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -19,6 +18,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
      private lateinit var Name: TextInputLayout
      private lateinit var URL: TextInputLayout
      private lateinit var typeIDSpinner: Spinner
+     private lateinit var builder: androidx.appcompat.app.AlertDialog.Builder
 
      override fun onCreate(savedInstanceState: Bundle?) {
           DataService.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
@@ -26,6 +26,8 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
           super.onCreate(savedInstanceState)
           setContentView(R.layout.editactivity)
+
+          builder = androidx.appcompat.app.AlertDialog.Builder(this)
 
           DataService.AbaLinksURL = if (DataService.sharedPreferences.getString("AbaLinksURL", "") != null) DataService.sharedPreferences.getString("AbaLinksURL", "").toString() else ""
 
@@ -56,10 +58,6 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                } catch (e: Exception) {
                     isAdding = false
                }
-
-               //DataService.abaLinksTypes = extras.getParcelableArrayList<AbaLinkType>(applicationContext.packageName + ".LinkTypes") as ArrayList<AbaLinkType>
-
-               //DataService.abaLinksTypeNames = extras.getStringArrayList(applicationContext.packageName + ".LinkTypeNames") as ArrayList<String>
 
                // remove "All" link type
                DataService.abaLinksTypeNames.remove("All")
@@ -100,17 +98,6 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
      override fun onNothingSelected(p0: AdapterView<*>?) { }
 
-     private fun alert(message: String, closeApp: Boolean = false) {
-          // Display dialog
-          val builder = AlertDialog.Builder(this)
-          builder.setMessage(message).setCancelable(false)
-                 .setPositiveButton("OK") { _, _ -> if (closeApp) finish() }
-
-          val alert = builder.create()
-
-          alert.show()
-     }
-
      fun goBackClick(v: View) {
           val intent = Intent(this, MainActivity::class.java)
           startActivity(intent)
@@ -124,8 +111,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           { _ ->
           },
           {
-               //System.out.println("****** Error response=" + error.toString());
-               alert("An error occurred " + if(!isAdding) "saving" else "adding" + " the link with the error " + it.toString(), false)
+               DataService.alert(builder, message="An error occurred " + if(!isAdding) "saving" else "adding" + " the link with the error " + it.toString(),finish={ finish() }, OKCallback=null)
           })
 
           requestQueue.add(request)
@@ -140,22 +126,22 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
           // Validate all fields
           if (name != null && name.isEmpty()) {
-              alert("Please enter the name", false)
+               DataService.alert(builder, message="Please enter the name",finish={ finish() },OKCallback = null)
               return
           }
 
           if (url != null && url.isEmpty()) {
-               alert("Please enter the URL", false)
+               DataService.alert(builder, message="Please enter the URL",finish={ finish() }, OKCallback=null)
                return
           }
 
           if (url != null && !url.startsWith("http://") && !url.startsWith("https://")) {
-               alert("The URL that you entered is not valid", false)
+               DataService.alert(builder, message="The URL that you entered is not valid",finish={ finish() }, OKCallback=null)
                return
           }
 
           if (typeIDSpinner.selectedItem == "") {
-               alert("Please select the type", false)
+               DataService.alert(builder, message="Please select the type",finish={ finish() }, OKCallback=null)
                return
           }
 
