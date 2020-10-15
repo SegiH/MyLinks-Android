@@ -31,9 +31,6 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 // TO DO
-// Replace all instances of !!
-// add way to delete saved url
-
 class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemSelectedListener {
      private val myLinksList: MutableList<MyLink> = ArrayList()
      private lateinit var searchView: EditText
@@ -45,9 +42,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      override fun onCreate(savedInstanceState: Bundle?) {
           DataService.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
-          this.setTheme(if (DataService.sharedPreferences.getBoolean("DarkThemeOn", false)) DataService.darkMode else DataService.lightMode)
+          DataService.init()
 
-          title = DataService.MyLinksTitle
+          this.setTheme(if (DataService.sharedPreferences.getBoolean("DarkThemeOn", false)) DataService.darkMode else DataService.lightMode)
 
           super.onCreate(savedInstanceState)
           setContentView(R.layout.activity_main)
@@ -67,6 +64,15 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           episodeListView = findViewById(R.id.episodeList)
 
           DataService.MyLinksURL=if (DataService.sharedPreferences.getString("MyLinksActiveURL", "") != null) DataService.sharedPreferences.getString("MyLinksActiveURL", "").toString() else ""
+
+          if (DataService.MyLinksURL.contains("ema"))
+               DataService.MyLinksTitle="Ema Links"
+          else if (DataService.MyLinksURL.contains("aba"))
+               DataService.MyLinksTitle="Aba Links"
+          else
+               title = DataService.MyLinksTitle
+
+          title = DataService.MyLinksTitle
 
           // Make sure that MyLinksURL always ends in a black slash
           if (DataService.MyLinksURL != "" && !DataService.MyLinksURL.endsWith("/"))
@@ -215,10 +221,13 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      public override fun onResume() {
           super.onResume()
 
-          if (DataService.MyLinksURL != "")
-               readJSONData("Types",DataService.getTypesDataEndpoint,::parseTypesJSON)
+          readJSONData("Types",DataService.getTypesDataEndpoint,::parseTypesJSON)
+
+          recyclerviewAdapter?.notifyDataSetChanged()
 
           if (episodeListView.adapter != null) episodeListView.adapter?.notifyDataSetChanged()
+
+          title = DataService.MyLinksTitle
      }
 
      // Event when this activity returns from another activity

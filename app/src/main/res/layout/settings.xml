@@ -22,52 +22,25 @@
     />
 
     <TextView
-         android:id="@+id/AddURLLabel"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:layout_marginTop="25dp"
-         android:text="@string/addMyLinksURL"
-         app:layout_constraintLeft_toLeftOf="parent"
-         app:layout_constraintTop_toBottomOf="@id/TitleBar"
-    />
-
-    <com.google.android.material.textfield.TextInputLayout
-         android:id="@+id/AddURL"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         app:layout_constraintRight_toRightOf="@id/AddURLLabel"
-         app:layout_constraintTop_toBottomOf="@id/TitleBar"
-         android:layout_marginStart="120dp"
-    >
-
-    <com.google.android.material.textfield.TextInputEditText
-         android:layout_width="280dp"
-         android:layout_height="wrap_content"
-         android:ellipsize="end"
-         android:inputType="text|textUri"
-         android:maxLines="1" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <TextView
          android:id="@+id/AddLinkURLs"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:layout_marginTop="76dp"
          android:text="@string/myLinksURLs"
          app:layout_constraintLeft_toLeftOf="parent"
-         app:layout_constraintTop_toBottomOf="@id/AddURLLabel"
+         app:layout_constraintTop_toBottomOf="@id/TitleBar"
     />
 
     <Button
          android:id="@+id/addURLButton"
-         android:layout_width="60dp"
+         android:layout_width="180dp"
          android:layout_height="wrap_content"
-         android:backgroundTint="@android:color/darker_gray"
+         android:backgroundTint="@android:color/holo_green_light"
          android:text="@string/addURL"
          app:layout_constraintTop_toBottomOf="@id/TitleBar"
          app:layout_constraintRight_toRightOf="parent"
          android:layout_marginTop="0dp"
-         android:onClick="addURLClick"
+         android:onClick="manageURLsClick"
     />
 
     <Spinner
@@ -79,7 +52,7 @@
          android:background="@android:drawable/btn_dropdown"
          android:spinnerMode="dropdown"
          app:layout_constraintLeft_toLeftOf="parent"
-         app:layout_constraintTop_toBottomOf="@id/AddURL" />
+         app:layout_constraintTop_toBottomOf="@id/TitleBar" />
 
     <com.google.android.material.switchmaterial.SwitchMaterial
          android:id="@+id/switchDarkMode"

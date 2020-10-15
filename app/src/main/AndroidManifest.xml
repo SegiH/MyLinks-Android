@@ -37,5 +37,9 @@
             android:name="com.segihovav.mylinks_android.EditActivity"
             android:label=""
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name="com.segihovav.mylinks_android.ManageLinks"
+            android:label=""
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 </manifest>
