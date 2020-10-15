@@ -2,7 +2,8 @@
     <string name="addLink">Add</string>
     <string name="app_name">MyLinks</string>
     <string name="action_settings">Settings</string>
-    <string name="myLinksURL">MyLinks URL</string>
+    <string name="addMyLinksURL">Add MyLinks URL</string>
+    <string name="myLinksURLs">MyLinks URLs</string>
     <string name="Search">Search</string>
     <string name="save">Save</string>string>
     <string name="goBack">Go Back</string>string>
@@ -13,5 +14,6 @@
     <string name="delete">Delete</string>
     <string name="name">Name</string>
     <string name="url">URL</string>
-    <string name="type">Type</string>string>
+    <string name="type">Type</string>
+  <string name="addURL">Add</string>string>
 </resources>

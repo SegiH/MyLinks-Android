@@ -31,6 +31,9 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 // TO DO
+// Replace all instances of !!
+// add way to delete saved url
+
 class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemSelectedListener {
      private val myLinksList: MutableList<MyLink> = ArrayList()
      private lateinit var searchView: EditText
@@ -43,6 +46,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           DataService.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
           this.setTheme(if (DataService.sharedPreferences.getBoolean("DarkThemeOn", false)) DataService.darkMode else DataService.lightMode)
+
+          title = DataService.MyLinksTitle
 
           super.onCreate(savedInstanceState)
           setContentView(R.layout.activity_main)
@@ -61,7 +66,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
           episodeListView = findViewById(R.id.episodeList)
 
-          DataService.MyLinksURL=if (DataService.sharedPreferences.getString("MyLinksURL", "") != null) DataService.sharedPreferences.getString("MyLinksURL", "").toString() else ""
+          DataService.MyLinksURL=if (DataService.sharedPreferences.getString("MyLinksActiveURL", "") != null) DataService.sharedPreferences.getString("MyLinksActiveURL", "").toString() else ""
 
           // Make sure that MyLinksURL always ends in a black slash
           if (DataService.MyLinksURL != "" && !DataService.MyLinksURL.endsWith("/"))

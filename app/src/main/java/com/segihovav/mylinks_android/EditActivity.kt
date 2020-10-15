@@ -29,11 +29,6 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
           builder = androidx.appcompat.app.AlertDialog.Builder(this)
 
-          DataService.MyLinksURL = if (DataService.sharedPreferences.getString("MyLinksURL", "") != null) DataService.sharedPreferences.getString("MyLinksURL", "").toString() else ""
-
-          if (DataService.MyLinksURL != "" && !DataService.MyLinksURL.endsWith("/"))
-               DataService.MyLinksURL+="/"
-
           val titleBar=findViewById<TextView>(R.id.TitleBar)
 
           Name=findViewById(R.id.Name)
