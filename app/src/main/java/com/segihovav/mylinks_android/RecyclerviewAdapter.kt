@@ -1,18 +1,15 @@
-package com.segihovav.abalinks_android
+package com.segihovav.mylinks_android
 
 import android.content.Context
 import android.graphics.Color
-import android.text.Html
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.RecyclerView
 
-class RecyclerviewAdapter internal constructor(private val mContext: Context,private val abaLinks: MutableList<AbaLink>,private val abaLinksTypes: MutableList<AbaLinkType>) : RecyclerView.Adapter<RecyclerviewAdapter.MyViewHolder>() {
+class RecyclerviewAdapter internal constructor(private val mContext: Context, private val myLinks: MutableList<MyLink>, private val myLinksTypes: MutableList<MyLinkType>) : RecyclerView.Adapter<RecyclerviewAdapter.MyViewHolder>() {
      var darkMode: Boolean = false
      var rowFG: LinearLayout? = null
      override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -22,21 +19,21 @@ class RecyclerviewAdapter internal constructor(private val mContext: Context,pri
      }
 
      override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-          val abaLinkItem: AbaLink = abaLinks[position]
+          val myLinkItem: MyLink = myLinks[position]
 
-          holder.linkName.text = abaLinkItem.Name
+          holder.linkName.text = myLinkItem.Name
 
           if (darkMode)
                rowFG?.setBackgroundColor(Color.GRAY)
 
-          for (i in abaLinksTypes.indices) {
-               if (abaLinksTypes[i].ID == abaLinkItem.TypeID)
-                    holder.linkInfo.text = abaLinksTypes[i].Name
+          for (i in myLinksTypes.indices) {
+               if (myLinksTypes[i].ID == myLinkItem.TypeID)
+                    holder.linkInfo.text = myLinksTypes[i].Name
           }
      }
 
      override fun getItemCount(): Int {
-          return abaLinks.size
+          return myLinks.size
      }
 
      @JvmName("setDarkMode1")

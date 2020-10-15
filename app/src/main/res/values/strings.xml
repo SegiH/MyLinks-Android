@@ -1,8 +1,8 @@
 <resources>
     <string name="addLink">Add</string>
-    <string name="app_name">AbaLinks</string>
+    <string name="app_name">MyLinks</string>
     <string name="action_settings">Settings</string>
-    <string name="abaLinksURL">AbaLinks URL</string>
+    <string name="myLinksURL">MyLinks URL</string>
     <string name="Search">Search</string>
     <string name="save">Save</string>string>
     <string name="goBack">Go Back</string>string>

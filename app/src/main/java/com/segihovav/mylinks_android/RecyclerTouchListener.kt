@@ -1,4 +1,4 @@
-package com.segihovav.abalinks_android
+package com.segihovav.mylinks_android
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
@@ -22,7 +22,7 @@ import java.util.Arrays.*
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 
-class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnItemTouchListener, com.segihovav.abalinks_android.OnActivityTouchListener {
+class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnItemTouchListener, com.segihovav.mylinks_android.OnActivityTouchListener {
      private val handler = Handler(Looper.getMainLooper())
      private var unSwipeableRows: List<Int>
 

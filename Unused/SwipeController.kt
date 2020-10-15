@@ -1,4 +1,4 @@
-package com.segihovav.abalinks_android
+package com.segihovav.mylinks_android
 
 import android.annotation.SuppressLint
 import android.graphics.*
@@ -17,12 +17,12 @@ internal enum class ButtonsState {
     GONE, RIGHT_VISIBLE
 }
 
-internal class SwipeController(private val buttonsActions: SwipeControllerActions, private var abaLinksList: List<AbaLink>) : ItemTouchHelper.Callback() {
+internal class SwipeController(private val buttonsActions: SwipeControllerActions, private var myLinksList: List<MyLink>) : ItemTouchHelper.Callback() {
     private var swipeBack = false
     private var buttonShowedState = ButtonsState.GONE
     private lateinit var buttonInstance: RectF
     private var mainActivity: AppCompatActivity? = null
-    private var linkTypes: ArrayList<AbaLinkType> = ArrayList()
+    private var linkTypes: ArrayList<MyLinkType> = ArrayList()
     private var linkTypeNames: ArrayList<String> = ArrayList()
     private var darkMode: Boolean = false
 
@@ -34,7 +34,7 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
         this.linkTypeNames=_linkTypeNames
     }
 
-    fun setLinkTypes(_linkTypes: ArrayList<AbaLinkType>) {
+    fun setLinkTypes(_linkTypes: ArrayList<MyLinkType>) {
          this.linkTypes=_linkTypes
     }
 
@@ -42,8 +42,8 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
         this.mainActivity=_mainActivity
     }
 
-    fun setAbaLinksList(newAbaLinksList: List<AbaLink>) {
-        abaLinksList = newAbaLinksList
+    fun setMyLinksList(newMyLinksList: List<MyLink>) {
+        myLinksList = newMyLinksList
     }
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
@@ -122,7 +122,7 @@ internal class SwipeController(private val buttonsActions: SwipeControllerAction
 
                 if (buttonInstance.contains(event.x,event.y)) {
                     if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
-                        mainActivity?.let { buttonsActions.onLeftClicked(abaLinksList, viewHolder.adapterPosition, it, linkTypes,linkTypeNames) }
+                        mainActivity?.let { buttonsActions.onLeftClicked(myLinksList, viewHolder.adapterPosition, it, linkTypes,linkTypeNames) }
                     }
                 }
 

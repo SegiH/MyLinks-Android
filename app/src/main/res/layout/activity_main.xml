@@ -6,7 +6,7 @@
      android:layout_width="match_parent"
      android:layout_height="match_parent"
      android:id="@+id/relativeLayout"
-     tools:context="com.segihovav.abalinks_android.MainActivity">
+     tools:context="com.segihovav.mylinks_android.MainActivity">
 
     <EditText
          android:id="@+id/searchView"
