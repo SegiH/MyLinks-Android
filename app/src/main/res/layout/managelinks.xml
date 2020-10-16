@@ -15,21 +15,48 @@
         android:height="50dp"
         android:background="@color/colorPrimary"
         android:textColor="@android:color/white"
-        android:textSize="22dp"
+        android:textSize="22sp"
         android:theme="@style/AppTheme.AppBarOverlay"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:text="Manage MyLink URLS"
+        android:text="@string/addURL"
     />
+
+    <TextView
+        android:id="@+id/AddNameLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:text="@string/name"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/TitleBar"
+    />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/AddName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toRightOf="@id/AddURLLabel"
+        app:layout_constraintTop_toBottomOf="@id/TitleBar"
+        android:layout_marginStart="120dp"
+        >
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:inputType="text|textUri"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
         android:id="@+id/AddURLLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="25dp"
-        android:text="@string/addMyLinksURL"
+        android:text="@string/url"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/TitleBar"
+        app:layout_constraintTop_toBottomOf="@id/AddNameLabel"
         />
 
     <com.google.android.material.textfield.TextInputLayout
@@ -37,7 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintRight_toRightOf="@id/AddURLLabel"
-        app:layout_constraintTop_toBottomOf="@id/TitleBar"
+        app:layout_constraintTop_toBottomOf="@id/AddNameLabel"
         android:layout_marginStart="120dp"
         >
 
@@ -65,7 +92,7 @@
         android:id="@+id/swipe_container_URL"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="170dp"
+        android:layout_marginTop="210dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.recyclerview.widget.RecyclerView

@@ -234,8 +234,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      public override fun onStart() {
           super.onStart()
 
-          val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-
           if (DataService.MyLinksURL != "" && !DataService.MyLinksURL.endsWith("/"))
                DataService.MyLinksURL+="/"
 
@@ -254,8 +252,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           }
 
           val params= "&LinkID=${myLinksList[deletingItemIndex].ID}"
-
-          val a=JSONArray()
 
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
@@ -369,6 +365,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
      // Read JSON from specific endpoint and call the specified callback after it has been fetched
      private fun readJSONData(dataType: String, endpoint: String, JSONCallback: ((JSONData: JSONArray, isRefreshing: Boolean) -> Unit)?, isRefreshing: Boolean = false) {
+          if (DataService.MyLinksURL == "")
+               return
+
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
           val request = JsonArrayRequest(Request.Method.GET, DataService.MyLinksURL + endpoint, null,

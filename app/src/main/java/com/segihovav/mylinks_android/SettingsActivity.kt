@@ -34,8 +34,8 @@ class SettingsActivity : AppCompatActivity() {
           myLinksURLs = findViewById<Spinner>(R.id.LinkURLSpinner)
 
           if (DataService.URLS.isNotEmpty()) {
-               if (DataService.URLS[0] != "")
-                    DataService.URLS.add(0,"")
+               //if (DataService.URLS[0] != "")
+                    //DataService.URLS.add(0,"")
 
                dataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,DataService.URLS as List<String>)
 

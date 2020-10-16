@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "511588862495",
+    "firebase_url": "https://mylinks-android.firebaseio.com",
+    "project_id": "mylinks-android",
+    "storage_bucket": "mylinks-android.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:511588862495:android:8bdc09a088e31efad6232a",
+        "android_client_info": {
+          "package_name": "com.segihovav.mylinks_android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "511588862495-p8nera9to4q9qaj2d9psurfk88paqr9p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPdezs7J_mdR74dmdjxV2IEufqyPcL-Z8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "511588862495-p8nera9to4q9qaj2d9psurfk88paqr9p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

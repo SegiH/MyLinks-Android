@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -18,11 +19,13 @@ import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.database.FirebaseDatabase
 import org.json.JSONArray
 
 class ManageLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
      private var recyclerviewAdapter: ManageLinksRecyclerviewAdapter? = null
      private lateinit var manageLinksRecyclerListView: RecyclerView
+     private lateinit var addMyLinksName: TextInputLayout
      private lateinit var addMyLinksURL: TextInputLayout
      private lateinit var touchListener: RecyclerTouchListener
 
@@ -32,6 +35,7 @@ class ManageLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
           super.onCreate(savedInstanceState)
           setContentView(R.layout.managelinks)
 
+          addMyLinksName = findViewById(R.id.AddName)
           addMyLinksURL = findViewById(R.id.AddURL)
 
           manageLinksRecyclerListView = findViewById(R.id.URLList)
@@ -82,22 +86,41 @@ class ManageLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
      override fun onNothingSelected(p0: AdapterView<*>) { }
 
      fun addURLClick(v: View) {
+         // Validate name and URL fields
+         if (addMyLinksName.editText != null && addMyLinksName.editText?.text != null && addMyLinksName.editText?.text.toString() == "") {
+               Toast.makeText(applicationContext, "Please enter the Name", Toast.LENGTH_LONG).show()
+               return
+          }
+
           if (addMyLinksURL.editText != null && addMyLinksURL.editText?.text != null && addMyLinksURL.editText?.text.toString() == "") {
                Toast.makeText(applicationContext, "Please enter the URL", Toast.LENGTH_LONG).show()
                return
           }
 
+          // Make sure that this URL has not been added before
           for (i in DataService.URLS.indices) {
-              if (DataService.URLS[i] == addMyLinksURL.editText?.text.toString())
+              if (DataService.URLS[i] == addMyLinksURL.editText?.text.toString()) {
                   Toast.makeText(applicationContext, "This URL has already been added enter the URL", Toast.LENGTH_LONG).show()
                   return
+              }
           }
 
+          // Add to list used for spinner
           DataService.URLS?.add(addMyLinksURL.editText?.text.toString())
 
-          saveURLS()
+          // Add to Firebase
+          val database = FirebaseDatabase.getInstance()
+          var myRef = database.getReference("MyLinks/" + addMyLinksName.editText?.text.toString())
+          myRef.setValue(addMyLinksURL.editText?.text.toString());
+
+          // Add to data store
+          DataService.dataStore.add(FBDataStore(addMyLinksName.editText?.text.toString(),addMyLinksURL.editText?.text.toString()))
 
           recyclerviewAdapter?.notifyDataSetChanged()
+
+          // Clear name and URL fields
+          addMyLinksName.editText?.setText("")
+          addMyLinksURL.editText?.setText("")
     }
 
      fun deleteRow(deletingItemIndex: Int = -1) {
@@ -106,9 +129,23 @@ class ManageLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
               return
           }
 
-          DataService.URLS.removeAt(deletingItemIndex)
 
-          saveURLS()
+
+          // Get the name of the item to delete'
+         for (i in DataService.dataStore.indices) {
+             if (DataService.dataStore[i].URL == DataService.URLS[deletingItemIndex]) {
+                 val database = FirebaseDatabase.getInstance()
+                 var myRef = database.getReference("MyLinks/" + DataService.dataStore[i].Name)
+                 myRef.removeValue()
+
+                 DataService.dataStore.removeAt(i)
+             }
+         }
+          //val database = FirebaseDatabase.getInstance()
+          //var myRef = database.getReference("MyLinks/" + addMyLinksName.editText?.text.toString())
+          //myRef.removeValue()
+
+          DataService.URLS.removeAt(deletingItemIndex)
 
           recyclerviewAdapter?.notifyDataSetChanged()
 
@@ -130,9 +167,9 @@ class ManageLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
           startActivity(intent)
      }
 
-     private fun saveURLS() {
-          val editor = DataService.sharedPreferences.edit()
+     /*private fun saveURLS() {
+          /*val editor = DataService.sharedPreferences.edit()
           editor.putStringSet("MyLinksURLs", DataService.URLS?.toHashSet())
-          editor.apply()
-    }
+          editor.apply()*/
+    }*/
 }
