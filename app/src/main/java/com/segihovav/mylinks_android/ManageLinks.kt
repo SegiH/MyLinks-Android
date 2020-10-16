@@ -87,6 +87,12 @@ class ManageLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                return
           }
 
+          for (i in DataService.URLS.indices) {
+              if (DataService.URLS[i] == addMyLinksURL.editText?.text.toString())
+                  Toast.makeText(applicationContext, "This URL has already been added enter the URL", Toast.LENGTH_LONG).show()
+                  return
+          }
+
           DataService.URLS?.add(addMyLinksURL.editText?.text.toString())
 
           saveURLS()
