@@ -1,7 +1,6 @@
 package com.segihovav.mylinks_android
 
 import android.content.Context
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 class ManageLinksRecyclerviewAdapter internal constructor(private val mContext: Context, private val myLinks: MutableList<String>) : RecyclerView.Adapter<ManageLinksRecyclerviewAdapter.MyViewHolder>() {
      var darkMode: Boolean = false
      var rowFG: LinearLayout? = null
+
      override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
           val view: View = LayoutInflater.from(mContext).inflate(R.layout.managelink_item, parent, false)
           rowFG=view.findViewById(R.id.rowFG)

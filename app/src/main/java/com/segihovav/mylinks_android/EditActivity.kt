@@ -44,6 +44,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           val extras = intent.extras
 
           if (extras != null) {
+               // Get IsAdding extra
                try {
                     if (extras.getBoolean(applicationContext.packageName + ".IsAdding")) {
                          isAdding = true
@@ -57,6 +58,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                // remove "All" link type
                DataService.myLinksTypeNames.remove("All")
 
+               // When adding a link,
                if (isAdding)
                     DataService.myLinksTypeNames.add(0,"")
 
@@ -66,25 +68,26 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
                // attaching data adapter to spinner
                typeIDSpinner.adapter = dataAdapter
 
+               // Existing item
                if (!isAdding) {
-                    // Get Link Item
-                    myLinkItem=extras.getParcelable<MyLink>(applicationContext.packageName + ".LinkItem")
+                    myLinkItem=extras.getParcelable<MyLink>(applicationContext.packageName + ".LinkItem") // Get Link Item
 
+                    // set the title
                     titleBar.text = "${DataService.MyLinksTitle} # ${myLinkItem?.ID}"
 
-                   Name.editText?.setText(myLinkItem?.Name)
+                    Name.editText?.setText(myLinkItem?.Name)
 
-                   URL.editText?.setText(myLinkItem?.URL)
+                    URL.editText?.setText(myLinkItem?.URL)
 
-                   for (i in DataService.myLinksTypes.indices) {
-                       if (DataService.myLinksTypes[i].ID == myLinkItem?.TypeID) {
-                           for (j in DataService.myLinksTypeNames.indices) {
-                                if (DataService.myLinksTypeNames[j] == DataService.myLinksTypes[i].Name) {
-                                     typeIDSpinner.setSelection(j)
-                                }
-                           }
-                       }
-                   }
+                    for (i in DataService.myLinksTypes.indices) {
+                         if (DataService.myLinksTypes[i].ID == myLinkItem?.TypeID) {
+                              for (j in DataService.myLinksTypeNames.indices) {
+                                   if (DataService.myLinksTypeNames[j] == DataService.myLinksTypes[i].Name) {
+                                        typeIDSpinner.setSelection(j)
+                                   }
+                              }
+                         }
+                    }
                }
           }
      }
@@ -102,12 +105,12 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
           val request = JsonArrayRequest(
-          Request.Method.GET, DataService.MyLinksURL + getLinkDataEndpoint + params, null,
-          { _ ->
-          },
-          {
-               DataService.alert(builder, message="An error occurred " + if(!isAdding) "saving" else "adding" + " the link with the error " + it.toString(),finish={ finish() }, OKCallback=null)
-          })
+               Request.Method.GET, DataService.MyLinksURL + getLinkDataEndpoint + params, null,
+               { _ ->
+               },
+               {
+                    DataService.alert(builder, message="An error occurred " + if(!isAdding) "saving" else "adding" + " the link with the error " + it.toString(),finish={ finish() }, OKCallback=null)
+               })
 
           requestQueue.add(request)
      }

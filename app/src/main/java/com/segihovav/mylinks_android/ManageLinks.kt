@@ -129,18 +129,17 @@ class ManageLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
               return
           }
 
-
-
           // Get the name of the item to delete'
-         for (i in DataService.dataStore.indices) {
-             if (DataService.dataStore[i].URL == DataService.URLS[deletingItemIndex]) {
-                 val database = FirebaseDatabase.getInstance()
-                 var myRef = database.getReference("MyLinks/" + DataService.dataStore[i].Name)
-                 myRef.removeValue()
+          for (i in DataService.dataStore.indices) {
+               if (DataService.dataStore[i].URL == DataService.URLS[deletingItemIndex]) {
+                    val database = FirebaseDatabase.getInstance()
+                    var myRef = database.getReference("MyLinks/" + DataService.dataStore[i].Name)
+                    myRef.removeValue()
 
-                 DataService.dataStore.removeAt(i)
-             }
-         }
+                    DataService.dataStore.removeAt(i)
+               }
+          }
+
           //val database = FirebaseDatabase.getInstance()
           //var myRef = database.getReference("MyLinks/" + addMyLinksName.editText?.text.toString())
           //myRef.removeValue()
@@ -171,5 +170,5 @@ class ManageLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
           /*val editor = DataService.sharedPreferences.edit()
           editor.putStringSet("MyLinksURLs", DataService.URLS?.toHashSet())
           editor.apply()*/
-    }*/
+     }*/
 }

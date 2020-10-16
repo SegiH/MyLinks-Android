@@ -6,19 +6,17 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import java.util.*
 import kotlin.collections.ArrayList
-
 
 class DataService {
      companion object {
-          @JvmStatic lateinit var MyLinksURL: String
-          @JvmStatic lateinit var sharedPreferences: SharedPreferences
-          @JvmStatic var myLinksTypes: ArrayList<MyLinkType> = ArrayList()
-          @JvmStatic var myLinksTypeNames: ArrayList<String> = ArrayList()
           @JvmStatic val getLinksDataEndpoint = "LinkData.php?task=fetchData"
           @JvmStatic val getTypesDataEndpoint = "LinkData.php?task=fetchTypes"
           @JvmStatic val deleteLinkDataEndpoint = "LinkData.php?task=deleteRow"
+          @JvmStatic var MyLinksURL: String = ""
+          @JvmStatic lateinit var sharedPreferences: SharedPreferences
+          @JvmStatic var myLinksTypes: ArrayList<MyLinkType> = ArrayList()
+          @JvmStatic var myLinksTypeNames: ArrayList<String> = ArrayList()
           @JvmStatic var lightMode = R.style.ThemeOverlay_MaterialComponents
           @JvmStatic var darkMode = R.style.ThemeOverlay_MaterialComponents_Dark
           @JvmStatic var URLS: MutableList<String> = mutableListOf()

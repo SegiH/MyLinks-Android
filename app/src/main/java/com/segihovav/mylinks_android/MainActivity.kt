@@ -314,8 +314,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           val intent = Intent(this, SettingsActivity::class.java)
 
           // When resuming this activity, hide the search field and search type dropdown
-         // if (searchView != null && searchView.visibility == View.VISIBLE)
-         //      searchViewIsVisible()
+          // if (searchView != null && searchView.visibility == View.VISIBLE)
+          //      searchViewIsVisible()
 
           startActivity(intent)
      }
