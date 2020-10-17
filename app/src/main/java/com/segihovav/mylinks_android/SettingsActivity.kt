@@ -14,7 +14,6 @@ import com.google.android.material.switchmaterial.SwitchMaterial
 class SettingsActivity : AppCompatActivity() {
      private lateinit var darkModeCheckbox: SwitchMaterial
      private lateinit var myLinksURLs: Spinner
-     private lateinit var dataAdapter: ArrayAdapter<String>
 
      private var darkModeToggled = false
 
@@ -32,20 +31,15 @@ class SettingsActivity : AppCompatActivity() {
 
           myLinksURLs = findViewById<Spinner>(R.id.LinkURLSpinner)
 
-          if (DataService.myLinkInstanceURLSNames.isNotEmpty()) {
-               dataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,DataService.myLinkInstanceURLSNames as List<String>)
+          DataService.myLinksInstancesDataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,DataService.myLinkInstanceURLSNames as List<String>)
 
-               // attaching data adapter to spinner
-               myLinksURLs.adapter = dataAdapter
-          } else {
-              dataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, mutableListOf())
-          }
+          // attaching data adapter to spinner
+          myLinksURLs.adapter = DataService.myLinksInstancesDataAdapter
 
           if (DataService.sharedPreferences.getString("MyLinksActiveURL", "") != "") {
-               for (i in DataService.dataStore.indices) {
+               for (i in DataService.dataStore.indices)
                     if (DataService.dataStore[i].URL == DataService.sharedPreferences.getString("MyLinksActiveURL", ""))
                          myLinksURLs.setSelection(i)
-                    }
           } else {
                DataService.alert(androidx.appcompat.app.AlertDialog.Builder(this), message = "Please select the active MyLinks URL", finish = { finish() }, OKCallback = null)
           }

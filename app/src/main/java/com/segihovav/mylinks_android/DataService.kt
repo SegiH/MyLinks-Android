@@ -1,14 +1,16 @@
 package com.segihovav.mylinks_android
 
 import android.content.SharedPreferences
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlin.collections.ArrayList
 
-class DataService {
+class DataService: AppCompatActivity() {
      companion object {
           @JvmStatic val getLinksDataEndpoint = "LinkData.php?task=fetchData"
           @JvmStatic val getTypesDataEndpoint = "LinkData.php?task=fetchTypes"
@@ -22,6 +24,7 @@ class DataService {
           @JvmStatic var myLinkInstanceURLSNames: MutableList<String> = mutableListOf()
           @JvmStatic var MyLinksTitle: String = "AbaLinks"
           @JvmStatic var dataStore: ArrayList<FBDataStore> = ArrayList();
+          @JvmStatic lateinit var myLinksInstancesDataAdapter: ArrayAdapter<String>
 
           @JvmStatic fun alert(builder: AlertDialog.Builder, message: String, closeApp: Boolean = false, confirmDialog: Boolean = false, finish: () -> Unit, OKCallback: (() -> Unit)?) {
                builder.setMessage(message).setCancelable(confirmDialog)
@@ -58,6 +61,8 @@ class DataService {
                              dataStore.add(FBDataStore(linkItem.key.toString(),linkItem.value.toString()))
                              myLinkInstanceURLSNames.add(linkItem.key.toString())
                          }
+
+                         myLinksInstancesDataAdapter.notifyDataSetChanged()
                     }
 
                     override fun onCancelled(error: DatabaseError) {
