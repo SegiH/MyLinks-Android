@@ -13,13 +13,13 @@ class DataService {
           @JvmStatic val getLinksDataEndpoint = "LinkData.php?task=fetchData"
           @JvmStatic val getTypesDataEndpoint = "LinkData.php?task=fetchTypes"
           @JvmStatic val deleteLinkDataEndpoint = "LinkData.php?task=deleteRow"
-          @JvmStatic var MyLinksURL: String = ""
+          @JvmStatic var MyLinksActiveURL: String = ""
           @JvmStatic lateinit var sharedPreferences: SharedPreferences
           @JvmStatic var myLinksTypes: ArrayList<MyLinkType> = ArrayList()
           @JvmStatic var myLinksTypeNames: ArrayList<String> = ArrayList()
           @JvmStatic var lightMode = R.style.ThemeOverlay_MaterialComponents
           @JvmStatic var darkMode = R.style.ThemeOverlay_MaterialComponents_Dark
-          @JvmStatic var URLS: MutableList<String> = mutableListOf()
+          @JvmStatic var myLinkInstanceURLSNames: MutableList<String> = mutableListOf()
           @JvmStatic var MyLinksTitle: String = "AbaLinks"
           @JvmStatic var dataStore: ArrayList<FBDataStore> = ArrayList();
 
@@ -42,15 +42,7 @@ class DataService {
           }
 
           @JvmStatic fun init() {
-               // Read myLinks instance URLS from shared Preferences
-               /*if (URLS != null) {
-                    val myLinksUrls = DataService.sharedPreferences.getStringSet("MyLinksURLs", mutableSetOf()) // get only ONCE
-
-                    if (!myLinksUrls.isNullOrEmpty())
-                         URLS.addAll(myLinksUrls)
-               }*/
-
-               // Read from Firebase
+               // Read myLinks instance URLS from Firebase
                val database = FirebaseDatabase.getInstance()
 
                var myRef = database.getReference("MyLinks")
@@ -59,18 +51,12 @@ class DataService {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                          val dataList = dataSnapshot.children.toList()
 
+                         dataStore.clear()
+                         myLinkInstanceURLSNames.clear()
+
                          for (linkItem in dataList) {
-                              var itemFound = false
-
-                              // Make sure that the link is not in the list already
-                              for (j in URLS.indices)
-                                   if (URLS[j] == linkItem.value)
-                                        itemFound = true
-
-                              if (!itemFound) {
-                                   dataStore.add(FBDataStore(linkItem.key.toString(),linkItem.value.toString()))
-                                   URLS.add(linkItem.value.toString())
-                              }
+                             dataStore.add(FBDataStore(linkItem.key.toString(),linkItem.value.toString()))
+                             myLinkInstanceURLSNames.add(linkItem.key.toString())
                          }
                     }
 

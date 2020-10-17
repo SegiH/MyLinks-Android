@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.google.android.material.textfield.TextInputLayout
 
 class SettingsActivity : AppCompatActivity() {
      private lateinit var darkModeCheckbox: SwitchMaterial
@@ -33,23 +32,20 @@ class SettingsActivity : AppCompatActivity() {
 
           myLinksURLs = findViewById<Spinner>(R.id.LinkURLSpinner)
 
-          if (DataService.URLS.isNotEmpty()) {
-               //if (DataService.URLS[0] != "")
-                    //DataService.URLS.add(0,"")
-
-               dataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,DataService.URLS as List<String>)
+          if (DataService.myLinkInstanceURLSNames.isNotEmpty()) {
+               dataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,DataService.myLinkInstanceURLSNames as List<String>)
 
                // attaching data adapter to spinner
                myLinksURLs.adapter = dataAdapter
           } else {
-               dataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, mutableListOf())
+              dataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, mutableListOf())
           }
 
           if (DataService.sharedPreferences.getString("MyLinksActiveURL", "") != "") {
-               for (i in DataService.URLS.indices) {
-                    if (DataService.URLS[i] == DataService.sharedPreferences.getString("MyLinksActiveURL", ""))
+               for (i in DataService.dataStore.indices) {
+                    if (DataService.dataStore[i].URL == DataService.sharedPreferences.getString("MyLinksActiveURL", ""))
                          myLinksURLs.setSelection(i)
-               }
+                    }
           } else {
                DataService.alert(androidx.appcompat.app.AlertDialog.Builder(this), message = "Please select the active MyLinks URL", finish = { finish() }, OKCallback = null)
           }
@@ -81,14 +77,20 @@ class SettingsActivity : AppCompatActivity() {
           val editor = DataService.sharedPreferences.edit()
 
           editor.putBoolean("DarkThemeOn", darkModeCheckbox.isChecked)
-          editor.putString("MyLinksActiveURL",myLinksURLs.selectedItem.toString())
+
+          for (i in DataService.dataStore.indices) {
+               if (DataService.dataStore[i].Name == myLinksURLs.selectedItem) {
+                    editor.putString("MyLinksActiveURL", DataService.dataStore[i].URL)
+                    DataService.MyLinksActiveURL = DataService.dataStore[i].URL.toString()
+                    break;
+               }
+          }
+       
           editor.apply()
 
-          DataService.MyLinksURL=myLinksURLs.selectedItem.toString()
-
-          if (DataService.MyLinksURL.contains("ema"))
+          if (DataService.MyLinksActiveURL.contains("ema"))
                DataService.MyLinksTitle="Ema Links"
-          else if (DataService.MyLinksURL.contains("aba"))
+          else if (DataService.MyLinksActiveURL.contains("aba"))
                DataService.MyLinksTitle="Aba Links"
 
           if (darkModeToggled)

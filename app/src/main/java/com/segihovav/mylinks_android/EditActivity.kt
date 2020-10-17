@@ -105,7 +105,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
           val request = JsonArrayRequest(
-               Request.Method.GET, DataService.MyLinksURL + getLinkDataEndpoint + params, null,
+               Request.Method.GET, DataService.MyLinksActiveURL + getLinkDataEndpoint + params, null,
                { _ ->
                },
                {

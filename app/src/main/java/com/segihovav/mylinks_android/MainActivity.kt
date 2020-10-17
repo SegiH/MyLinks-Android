@@ -63,11 +63,11 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
           episodeListView = findViewById(R.id.episodeList)
 
-          DataService.MyLinksURL=if (DataService.sharedPreferences.getString("MyLinksActiveURL", "") != null) DataService.sharedPreferences.getString("MyLinksActiveURL", "").toString() else ""
+          DataService.MyLinksActiveURL=if (DataService.sharedPreferences.getString("MyLinksActiveURL", "") != null) DataService.sharedPreferences.getString("MyLinksActiveURL", "").toString() else ""
 
-          if (DataService.MyLinksURL.contains("ema"))
+          if (DataService.MyLinksActiveURL.contains("ema"))
                DataService.MyLinksTitle="Ema Links"
-          else if (DataService.MyLinksURL.contains("aba"))
+          else if (DataService.MyLinksActiveURL.contains("aba"))
                DataService.MyLinksTitle="Aba Links"
           else
                title = DataService.MyLinksTitle
@@ -75,10 +75,10 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           title = DataService.MyLinksTitle
 
           // Make sure that MyLinksURL always ends in a black slash
-          if (DataService.MyLinksURL != "" && !DataService.MyLinksURL.endsWith("/"))
-               DataService.MyLinksURL+="/"
+          if (DataService.MyLinksActiveURL != "" && !DataService.MyLinksActiveURL.endsWith("/"))
+               DataService.MyLinksActiveURL+="/"
 
-          if (DataService.MyLinksURL == "")
+          if (DataService.MyLinksActiveURL == "")
                loadSettingsActivity()
 
           val builder=AlertDialog.Builder(this)
@@ -234,10 +234,10 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      public override fun onStart() {
           super.onStart()
 
-          if (DataService.MyLinksURL != "" && !DataService.MyLinksURL.endsWith("/"))
-               DataService.MyLinksURL+="/"
+          if (DataService.MyLinksActiveURL != "" && !DataService.MyLinksActiveURL.endsWith("/"))
+               DataService.MyLinksActiveURL+="/"
 
-          if (DataService.myLinksTypes.size == 0 && DataService.MyLinksURL != "")
+          if (DataService.myLinksTypes.size == 0 && DataService.MyLinksActiveURL != "")
                readJSONData("Types",DataService.getTypesDataEndpoint,::parseTypesJSON)
      }
 
@@ -256,7 +256,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
           val request = JsonArrayRequest(
-                  Request.Method.GET, DataService.MyLinksURL + DataService.deleteLinkDataEndpoint + params, null,
+                  Request.Method.GET, DataService.MyLinksActiveURL + DataService.deleteLinkDataEndpoint + params, null,
                   { _ ->
                   },
                   {
@@ -365,12 +365,12 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
      // Read JSON from specific endpoint and call the specified callback after it has been fetched
      private fun readJSONData(dataType: String, endpoint: String, JSONCallback: ((JSONData: JSONArray, isRefreshing: Boolean) -> Unit)?, isRefreshing: Boolean = false) {
-          if (DataService.MyLinksURL == "")
+          if (DataService.MyLinksActiveURL == "")
                return
 
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
-          val request = JsonArrayRequest(Request.Method.GET, DataService.MyLinksURL + endpoint, null,
+          val request = JsonArrayRequest(Request.Method.GET, DataService.MyLinksActiveURL + endpoint, null,
                   { response ->
                        var jsonarray: JSONArray = JSONArray()
 
