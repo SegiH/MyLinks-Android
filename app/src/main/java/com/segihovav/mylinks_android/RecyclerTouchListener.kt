@@ -400,7 +400,9 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
                     }
                     touchedX = motionEvent.rawX
                     touchedY = motionEvent.rawY
-                    touchedPosition = rView.getChildAdapterPosition(touchedView)
+
+                    if (touchedView != null)
+                         touchedPosition = rView.getChildAdapterPosition(touchedView)
 
                     if (shouldIgnoreAction(touchedPosition)) {
                          touchedPosition = ListView.INVALID_POSITION
