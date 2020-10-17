@@ -19,7 +19,9 @@ class ManageLinksRecyclerviewAdapter internal constructor(private val mContext: 
      }
 
      override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-          holder.linkName.text = myLinks[position]
+          //holder.linkName.text = myLinks[position]
+          holder.linkName.text = DataService.dataStore[position].Name
+          holder.linkInfo.text = DataService.dataStore[position].URL
      }
 
      override fun getItemCount(): Int {
