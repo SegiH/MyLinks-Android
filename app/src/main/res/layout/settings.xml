@@ -33,7 +33,7 @@
 
     <Button
          android:id="@+id/addURLButton"
-         android:layout_width="180dp"
+         android:layout_width="270dp"
          android:layout_height="wrap_content"
          android:backgroundTint="@android:color/holo_green_light"
          android:text="@string/addURL"

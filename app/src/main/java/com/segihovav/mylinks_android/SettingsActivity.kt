@@ -85,7 +85,7 @@ class SettingsActivity : AppCompatActivity() {
                     break;
                }
           }
-       
+
           editor.apply()
 
           if (DataService.MyLinksActiveURL.contains("ema"))
