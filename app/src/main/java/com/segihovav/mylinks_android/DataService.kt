@@ -15,15 +15,15 @@ class DataService: AppCompatActivity() {
           @JvmStatic val getLinksDataEndpoint = "LinkData.php?task=fetchData"
           @JvmStatic val getTypesDataEndpoint = "LinkData.php?task=fetchTypes"
           @JvmStatic val deleteLinkDataEndpoint = "LinkData.php?task=deleteRow"
+          @JvmStatic val lightMode = R.style.ThemeOverlay_MaterialComponents
+          @JvmStatic val darkMode = R.style.ThemeOverlay_MaterialComponents_Dark
           @JvmStatic var MyLinksActiveURL: String = ""
-          @JvmStatic lateinit var sharedPreferences: SharedPreferences
           @JvmStatic var myLinksTypes: ArrayList<MyLinkType> = ArrayList()
           @JvmStatic var myLinksTypeNames: ArrayList<String> = ArrayList()
-          @JvmStatic var lightMode = R.style.ThemeOverlay_MaterialComponents
-          @JvmStatic var darkMode = R.style.ThemeOverlay_MaterialComponents_Dark
           @JvmStatic var myLinkInstanceURLSNames: MutableList<String> = mutableListOf()
           @JvmStatic var MyLinksTitle: String = "AbaLinks"
-          @JvmStatic var dataStore: ArrayList<FBDataStore> = ArrayList();
+          @JvmStatic var dataStore: ArrayList<FirebaseDataStore> = ArrayList();
+          @JvmStatic lateinit var sharedPreferences: SharedPreferences
           @JvmStatic lateinit var myLinksInstancesDataAdapter: ArrayAdapter<String>
 
           @JvmStatic fun alert(builder: AlertDialog.Builder, message: String, closeApp: Boolean = false, confirmDialog: Boolean = false, finish: () -> Unit, OKCallback: (() -> Unit)?) {
@@ -50,6 +50,7 @@ class DataService: AppCompatActivity() {
 
                var myRef = database.getReference("MyLinks")
 
+               // Firebase Event listener
                myRef.addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                          val dataList = dataSnapshot.children.toList()
@@ -58,7 +59,7 @@ class DataService: AppCompatActivity() {
                          myLinkInstanceURLSNames.clear()
 
                          for (linkItem in dataList) {
-                             dataStore.add(FBDataStore(linkItem.key.toString(),linkItem.value.toString()))
+                             dataStore.add(FirebaseDataStore(linkItem.key.toString(),linkItem.value.toString()))
                              myLinkInstanceURLSNames.add(linkItem.key.toString())
                          }
 
