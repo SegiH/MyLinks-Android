@@ -30,11 +30,6 @@ class ManageLinksRecyclerviewAdapter internal constructor(private val mContext: 
           return myLinks.size
      }
 
-     @JvmName("setDarkMode1")
-     public fun setDarkMode(_darkMode: Boolean) {
-          this.darkMode=_darkMode
-     }
-
      inner class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
           val linkName: TextView = itemView.findViewById(R.id.link_name)
           val linkInfo: TextView = itemView.findViewById(R.id.link_info)
