@@ -63,7 +63,10 @@ class DataService: AppCompatActivity() {
                              myLinkInstanceURLSNames.add(linkItem.key.toString())
                          }
 
-                         myLinksInstancesDataAdapter.notifyDataSetChanged()
+                         try {
+                           myLinksInstancesDataAdapter.notifyDataSetChanged()
+                         }  catch(e: Exception) {}
+                      
                     }
 
                     override fun onCancelled(error: DatabaseError) {
