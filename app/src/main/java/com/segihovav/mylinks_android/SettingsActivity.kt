@@ -1,12 +1,10 @@
 package com.segihovav.mylinks_android
 
 import android.content.Intent
+import android.opengl.Visibility
 import android.os.Bundle
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
@@ -49,6 +47,7 @@ class SettingsActivity : AppCompatActivity() {
                                  jsonarray = JSONArray(response.toString())
 
                                  DataService.myLinkInstanceURLSNames.clear()
+                                 DataService.dataStore.clear()
 
                                  for (i in 0 until jsonarray.length()) {
                                       try {
@@ -62,7 +61,18 @@ class SettingsActivity : AppCompatActivity() {
                                       }
                                  }
 
+                                 DataService.myLinksInstancesDataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,DataService.myLinkInstanceURLSNames as List<String>)
 
+                                 // attaching data adapter to spinner
+                                 myLinksURLs.adapter = DataService.myLinksInstancesDataAdapter
+
+                                 if (DataService.sharedPreferences.getString("MyLinksActiveURL", "") != "") {
+                                      for (i in DataService.dataStore.indices)
+                                           if (DataService.dataStore[i].URL == DataService.sharedPreferences.getString("MyLinksActiveURL", ""))
+                                                myLinksURLs.setSelection(i)
+                                 } else {
+                                      DataService.alert(androidx.appcompat.app.AlertDialog.Builder(this), message = "Please select the active MyLinks URL", finish = { finish() }, OKCallback = null)
+                                 }
                             } catch (e: JSONException) {
                                  e.printStackTrace()
                             }
@@ -72,20 +82,10 @@ class SettingsActivity : AppCompatActivity() {
                        }
                )
                requestQueue.add(request)
-          }
 
-
-          DataService.myLinksInstancesDataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,DataService.myLinkInstanceURLSNames as List<String>)
-
-          // attaching data adapter to spinner
-          myLinksURLs.adapter = DataService.myLinksInstancesDataAdapter
-
-          if (DataService.sharedPreferences.getString("MyLinksActiveURL", "") != "") {
-               for (i in DataService.dataStore.indices)
-                    if (DataService.dataStore[i].URL == DataService.sharedPreferences.getString("MyLinksActiveURL", ""))
-                         myLinksURLs.setSelection(i)
-          } else {
-               DataService.alert(androidx.appcompat.app.AlertDialog.Builder(this), message = "Please select the active MyLinks URL", finish = { finish() }, OKCallback = null)
+               // For now, hide the Manage URLS button until I can finish the backend logic if we aren't using Firebase
+               val addURLButton = findViewById<Button>(R.id.addURLButton)
+               addURLButton.visibility = View.GONE
           }
 
           darkModeCheckbox.isChecked = DataService.sharedPreferences.getBoolean("DarkThemeOn", false)

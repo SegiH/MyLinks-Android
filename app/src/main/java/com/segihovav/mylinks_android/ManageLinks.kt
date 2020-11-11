@@ -99,9 +99,13 @@ class ManageLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
           DataService.myLinkInstanceURLSNames.add(addMyLinksURL.editText?.text.toString())
 
           // Add to Firebase
-          val database = FirebaseDatabase.getInstance()
-          var myRef = database.getReference("MyLinks/" + addMyLinksName.editText?.text.toString())
-          myRef.setValue(addMyLinksURL.editText?.text.toString());
+          if (DataService.useFirebase) {
+              val database = FirebaseDatabase.getInstance()
+              var myRef = database.getReference("MyLinks/" + addMyLinksName.editText?.text.toString())
+              myRef.setValue(addMyLinksURL.editText?.text.toString());
+          } else {
+
+          }
 
           // Clear name and URL fields
           addMyLinksName.editText?.setText("")
