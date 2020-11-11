@@ -7,9 +7,16 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.Volley
 import com.google.android.material.switchmaterial.SwitchMaterial
+import org.json.JSONArray
+import org.json.JSONException
 
 class SettingsActivity : AppCompatActivity() {
      private lateinit var darkModeCheckbox: SwitchMaterial
@@ -30,6 +37,43 @@ class SettingsActivity : AppCompatActivity() {
           darkModeCheckbox = findViewById(R.id.switchDarkMode)
 
           myLinksURLs = findViewById<Spinner>(R.id.LinkURLSpinner)
+
+          if (!DataService.useFirebase) {
+               val requestQueue: RequestQueue = Volley.newRequestQueue(this)
+
+               val request = JsonArrayRequest(Request.Method.GET, "https://mylinks-instances.hovav.org/?MyLinks-Instances-Auth=)j3s%3CltoEcv;eW=g0xX", null,
+                       { response ->
+                            var jsonarray: JSONArray = JSONArray()
+
+                            try {
+                                 jsonarray = JSONArray(response.toString())
+
+                                 DataService.myLinkInstanceURLSNames.clear()
+
+                                 for (i in 0 until jsonarray.length()) {
+                                      try {
+                                           val jsonobject = jsonarray.getJSONObject(i)
+
+                                           DataService.dataStore.add(FirebaseDataStore(jsonobject.getString("Name"), jsonobject.getString("URL")))
+                                           DataService.myLinkInstanceURLSNames.add(jsonobject.getString("Name"))
+                                      } catch (e: JSONException) {
+                                           //e.printStackTrace()
+                                           DataService.alert(builder = AlertDialog.Builder(this), message = "An error occurred reading the links. Please check your network connection or the URL in Settings", finish = { finish() }, OKCallback = null)
+                                      }
+                                 }
+
+
+                            } catch (e: JSONException) {
+                                 e.printStackTrace()
+                            }
+                       },
+                       {
+                            //DataService.alert(builder= AlertDialog.Builder(this), message="An error occurred reading the $dataType with the error $it. Please check your network connection", finish={ finish() }, OKCallback=null)
+                       }
+               )
+               requestQueue.add(request)
+          }
+
 
           DataService.myLinksInstancesDataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,DataService.myLinkInstanceURLSNames as List<String>)
 

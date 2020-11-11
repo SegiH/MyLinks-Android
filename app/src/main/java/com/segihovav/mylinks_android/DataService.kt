@@ -9,6 +9,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlin.collections.ArrayList
+import java.sql.Connection
+import java.sql.DriverManager
 
 class DataService: AppCompatActivity() {
      companion object {
@@ -25,6 +27,7 @@ class DataService: AppCompatActivity() {
           @JvmStatic var dataStore: ArrayList<FirebaseDataStore> = ArrayList();
           @JvmStatic lateinit var sharedPreferences: SharedPreferences
           @JvmStatic lateinit var myLinksInstancesDataAdapter: ArrayAdapter<String>
+          @JvmStatic val useFirebase: Boolean = false
 
           @JvmStatic fun alert(builder: AlertDialog.Builder, message: String, closeApp: Boolean = false, confirmDialog: Boolean = false, finish: () -> Unit, OKCallback: (() -> Unit)?) {
                builder.setMessage(message).setCancelable(confirmDialog)
@@ -45,6 +48,9 @@ class DataService: AppCompatActivity() {
           }
 
           @JvmStatic fun init() {
+               if (!useFirebase)
+                    return
+
                // Read myLinks instance URLS from Firebase
                val database = FirebaseDatabase.getInstance()
 
@@ -76,11 +82,11 @@ class DataService: AppCompatActivity() {
                })
 
                // Write the data to Firebase. Uncomment me if this data is deleted from the DB
-               /*var myRefAdd = database.getReference("MyLinks/AbaLinks")
+               var myRefAdd = database.getReference("MyLinks/AbaLinks")
                myRefAdd.setValue("https://abalinks.hovav.org");
 
                myRefAdd = database.getReference("MyLinks/EmaLinks")
-               myRefAdd.setValue("https://emalinks.hovav.org");*/
+               myRefAdd.setValue("https://emalinks.hovav.org");
           }
      }
 }
