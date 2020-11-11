@@ -164,6 +164,15 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           } else { // Save new item
                getLinkDataEndpoint = "LinkData.php?task=insertRow"
 
+               for (i in DataService.myLinksTypes.indices) {
+                    val linkTypeName=if (DataService.myLinksTypes[i].Name != null) DataService.myLinksTypes[i].Name else ""
+
+                    if (linkTypeName == typeIDSpinner.selectedItem) {
+                         //params="&rowID=${this.myLinkItem?.ID}&columnName=TypeID&columnValue=${DataService.myLinksTypes[i].ID}"
+                         //processData(getLinkDataEndpoint, params)
+                    }
+               }
+
                params="&Name=${name}&URL=${url}&Type=${typeIDSpinner.selectedItem}"
 
                processData(getLinkDataEndpoint, params)
