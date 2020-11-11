@@ -9,8 +9,6 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlin.collections.ArrayList
-import java.sql.Connection
-import java.sql.DriverManager
 
 class DataService: AppCompatActivity() {
      companion object {
@@ -19,15 +17,17 @@ class DataService: AppCompatActivity() {
           @JvmStatic val deleteLinkDataEndpoint = "LinkData.php?task=deleteRow"
           @JvmStatic val lightMode = R.style.ThemeOverlay_MaterialComponents
           @JvmStatic val darkMode = R.style.ThemeOverlay_MaterialComponents_Dark
+          @JvmStatic val JSONBaseURL: String="https://mylinks-instances.hovav.org/"
+          @JvmStatic val JSONAuthToken: String=")j3s%3CltoEcv;eW=g0xX"
+          @JvmStatic var useFirebase: Boolean = false
           @JvmStatic var MyLinksActiveURL: String = ""
           @JvmStatic var myLinksTypes: ArrayList<MyLinkType> = ArrayList()
           @JvmStatic var myLinksTypeNames: ArrayList<String> = ArrayList()
           @JvmStatic var myLinkInstanceURLSNames: MutableList<String> = mutableListOf()
           @JvmStatic var MyLinksTitle: String = "AbaLinks"
-          @JvmStatic var dataStore: ArrayList<FirebaseDataStore> = ArrayList();
+          @JvmStatic var instanceURLType: ArrayList<InstanceURLType> = ArrayList();
           @JvmStatic lateinit var sharedPreferences: SharedPreferences
           @JvmStatic lateinit var myLinksInstancesDataAdapter: ArrayAdapter<String>
-          @JvmStatic val useFirebase: Boolean = false
 
           @JvmStatic fun alert(builder: AlertDialog.Builder, message: String, closeApp: Boolean = false, confirmDialog: Boolean = false, finish: () -> Unit, OKCallback: (() -> Unit)?) {
                builder.setMessage(message).setCancelable(confirmDialog)
@@ -61,11 +61,11 @@ class DataService: AppCompatActivity() {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                          val dataList = dataSnapshot.children.toList()
 
-                         dataStore.clear()
+                         instanceURLType.clear()
                          myLinkInstanceURLSNames.clear()
 
                          for (linkItem in dataList) {
-                             dataStore.add(FirebaseDataStore(linkItem.key.toString(),linkItem.value.toString()))
+                             instanceURLType.add(InstanceURLType(linkItem.key.toString(),linkItem.value.toString()))
                              myLinkInstanceURLSNames.add(linkItem.key.toString())
                          }
 

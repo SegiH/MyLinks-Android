@@ -11,11 +11,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.Volley
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.database.FirebaseDatabase
 
-class ManageLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
-     private var recyclerviewAdapter: ManageLinksRecyclerviewAdapter? = null
+class ManageInstanceLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
+     private var recyclerviewAdapterInstance: ManageInstanceLinksRecyclerviewAdapter? = null
      private lateinit var manageLinksRecyclerListView: RecyclerView
      private lateinit var addMyLinksName: TextInputLayout
      private lateinit var addMyLinksURL: TextInputLayout
@@ -25,23 +29,23 @@ class ManageLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
           val layoutManager: RecyclerView.LayoutManager
 
           super.onCreate(savedInstanceState)
-          setContentView(R.layout.managelinks)
+          setContentView(R.layout.manage_instance_links)
 
           addMyLinksName = findViewById(R.id.AddName)
           addMyLinksURL = findViewById(R.id.AddURL)
 
           manageLinksRecyclerListView = findViewById(R.id.URLList)
 
-          recyclerviewAdapter = ManageLinksRecyclerviewAdapter(this, DataService.myLinkInstanceURLSNames)
+          recyclerviewAdapterInstance = ManageInstanceLinksRecyclerviewAdapter(this, DataService.myLinkInstanceURLSNames)
 
           layoutManager = LinearLayoutManager(applicationContext)
 
           manageLinksRecyclerListView.layoutManager = layoutManager
           manageLinksRecyclerListView.itemAnimator = DefaultItemAnimator()
 
-          registerForContextMenu(manageLinksRecyclerListView)
+          //registerForContextMenu(manageLinksRecyclerListView)
 
-          manageLinksRecyclerListView.adapter = recyclerviewAdapter
+          manageLinksRecyclerListView.adapter = recyclerviewAdapterInstance
 
           val builder= AlertDialog.Builder(this)
 
@@ -67,8 +71,8 @@ class ManageLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
      override fun onConfigurationChanged(newConfig: Configuration) {
           super.onConfigurationChanged(newConfig)
 
-          if (manageLinksRecyclerListView.adapter != null)
-               manageLinksRecyclerListView.adapter?.notifyDataSetChanged()
+          //if (manageLinksRecyclerListView.adapter != null)
+          //     manageLinksRecyclerListView.adapter?.notifyDataSetChanged()
      }
 
      override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) { }
@@ -88,23 +92,35 @@ class ManageLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
           }
 
           // Make sure that this URL has not been added before
-          for (i in DataService.dataStore.indices) {
-               if (DataService.dataStore[i].URL == addMyLinksURL.editText?.text.toString()) {
+          for (i in DataService.instanceURLType.indices) {
+               if (DataService.instanceURLType[i].URL == addMyLinksURL.editText?.text.toString()) {
                  Toast.makeText(applicationContext, "This URL has already been added enter the URL", Toast.LENGTH_LONG).show()
                  return
                }
           }
 
           /// Add to list used for spinner
-          DataService.myLinkInstanceURLSNames.add(addMyLinksURL.editText?.text.toString())
+          DataService.myLinkInstanceURLSNames.add(addMyLinksName.editText?.text.toString())
 
+          recyclerviewAdapterInstance?.notifyDataSetChanged()
+
+          DataService.instanceURLType.add(InstanceURLType(addMyLinksName.editText?.text.toString(),addMyLinksURL.editText?.text.toString()))
           // Add to Firebase
           if (DataService.useFirebase) {
               val database = FirebaseDatabase.getInstance()
               var myRef = database.getReference("MyLinks/" + addMyLinksName.editText?.text.toString())
               myRef.setValue(addMyLinksURL.editText?.text.toString());
           } else {
+              val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
+              val request = JsonArrayRequest(Request.Method.GET, DataService.JSONBaseURL +  "?MyLinks-Instances-Auth=" + DataService.JSONAuthToken + "&task=addURL&Name=" + addMyLinksName.editText?.text.toString() + "&URL=" + addMyLinksURL.editText?.text.toString(), null,
+                      { _ ->
+                      },
+                      {
+                          //DataService.alert(builder= AlertDialog.Builder(this), message="An error occurred adding an Instance URL with the error $it. Please check your network connection", finish={ finish() }, OKCallback=null)
+                      }
+              )
+              requestQueue.add(request)
           }
 
           // Clear name and URL fields
@@ -119,20 +135,33 @@ class ManageLinks : AppCompatActivity(), AdapterView.OnItemSelectedListener {
           }
 
           // Delete from Firebase
-          val database = FirebaseDatabase.getInstance()
-          var myRef = database.getReference("MyLinks/" + DataService.dataStore[deletingItemIndex].Name)
-          myRef.removeValue()
+          if (DataService.useFirebase) {
+              val database = FirebaseDatabase.getInstance()
+              var myRef = database.getReference("MyLinks/" + DataService.instanceURLType[deletingItemIndex].Name)
+              myRef.removeValue()
+          } else {
+              val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
-          DataService.dataStore.removeAt(deletingItemIndex)
+              val request = JsonArrayRequest(Request.Method.GET, DataService.JSONBaseURL +  "?MyLinks-Instances-Auth=" + DataService.JSONAuthToken + "&task=deleteURL&Name=" + DataService.instanceURLType[deletingItemIndex].Name, null,
+                      { _ ->
+                      },
+                      {
+                          //DataService.alert(builder= AlertDialog.Builder(this), message="An error occurred adding an Instance URL with the error $it. Please check your network connection", finish={ finish() }, OKCallback=null)
+                      }
+              )
+              requestQueue.add(request)
+          }
+
+          DataService.instanceURLType.removeAt(deletingItemIndex)
           DataService.myLinkInstanceURLSNames.removeAt(deletingItemIndex)
 
-          recyclerviewAdapter?.notifyDataSetChanged()
+          recyclerviewAdapterInstance?.notifyDataSetChanged()
 
           DataService.alert(builder=AlertDialog.Builder(this), message="Item has been deleted", finish={ finish() }, OKCallback=null)
      }
 
      fun goBackClick(v: View?) {
-          if (DataService.dataStore.size == 0) {
+          if (DataService.instanceURLType.size == 0) {
                // If there are no MyLink instance URLs unset active URL
                val editor = DataService.sharedPreferences.edit()
                editor.putString("MyLinksActiveURL","")

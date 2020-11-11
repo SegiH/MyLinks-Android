@@ -8,22 +8,22 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ManageLinksRecyclerviewAdapter internal constructor(private val mContext: Context, private val myLinks: MutableList<String>) : RecyclerView.Adapter<ManageLinksRecyclerviewAdapter.MyViewHolder>() {
+class ManageInstanceLinksRecyclerviewAdapter internal constructor(private val mContext: Context, private val myLinks: MutableList<String>) : RecyclerView.Adapter<ManageInstanceLinksRecyclerviewAdapter.MyViewHolder>() {
      var darkMode: Boolean = false
      var rowFG: LinearLayout? = null
 
      override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-          val view: View = LayoutInflater.from(mContext).inflate(R.layout.managelink_item, parent, false)
+          val view: View = LayoutInflater.from(mContext).inflate(R.layout.manage_instance_link_item, parent, false)
           rowFG=view.findViewById(R.id.rowFG)
           return MyViewHolder(view)
      }
 
      override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-          if (position >= DataService.dataStore.size)
+          if (position >= DataService.instanceURLType.size)
                return
 
-          holder.linkName.text = DataService.dataStore[position].Name
-          holder.linkInfo.text = DataService.dataStore[position].URL
+          holder.linkName.text = DataService.instanceURLType[position].Name
+          holder.linkInfo.text = DataService.instanceURLType[position].URL
      }
 
      override fun getItemCount(): Int {

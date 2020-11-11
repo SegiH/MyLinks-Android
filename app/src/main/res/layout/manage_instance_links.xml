@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/manageURLLayout"
-    tools:context="com.segihovav.mylinks_android.ManageLinks">
+    tools:context="com.segihovav.mylinks_android.ManageInstanceLinks">
 
     <TextView
         android:id="@+id/TitleBar"
@@ -88,27 +88,22 @@
         android:onClick="addURLClick"
     />
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_container_URL"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="210dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/URLList"
-            android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:clipToPadding="true"
-            android:orientation="horizontal"
-            android:overScrollMode="never"
-            app:fastScrollEnabled="true"
-            app:fastScrollHorizontalThumbDrawable="@drawable/thumb_drawable"
-            app:fastScrollHorizontalTrackDrawable="@drawable/line_drawable"
-            app:fastScrollVerticalThumbDrawable="@drawable/thumb_drawable"
-            app:fastScrollVerticalTrackDrawable="@drawable/line_drawable"
-            android:scrollbars="vertical" />
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    <androidx.recyclerview.widget.RecyclerView
+         android:id="@+id/URLList"
+         android:layout_width="match_parent"
+         android:layout_height="210dp"
+         android:clipToPadding="true"
+         android:orientation="horizontal"
+         android:overScrollMode="never"
+         app:fastScrollEnabled="true"
+         app:fastScrollHorizontalThumbDrawable="@drawable/thumb_drawable"
+         app:fastScrollHorizontalTrackDrawable="@drawable/line_drawable"
+         app:fastScrollVerticalThumbDrawable="@drawable/thumb_drawable"
+         app:fastScrollVerticalTrackDrawable="@drawable/line_drawable"
+         app:layout_constraintTop_toBottomOf="@id/AddMyLinkURL"
+         app:layout_constraintLeft_toLeftOf="parent"
+         android:scrollbars="vertical"
+    />
 
     <Button
         android:id="@+id/goBackButton"

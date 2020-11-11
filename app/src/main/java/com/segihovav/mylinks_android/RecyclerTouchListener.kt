@@ -401,8 +401,10 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
                     touchedX = motionEvent.rawX
                     touchedY = motionEvent.rawY
 
-                    if (touchedView != null)
-                         touchedPosition = rView.getChildAdapterPosition(touchedView)
+                    if (!::touchedView.isInitialized)
+                         return false
+
+                    touchedPosition = rView.getChildAdapterPosition(touchedView)
 
                     if (shouldIgnoreAction(touchedPosition)) {
                          touchedPosition = ListView.INVALID_POSITION
@@ -504,6 +506,9 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
                               swipedLeftProper = mFinalDelta < 0
                               swipedRightProper = mFinalDelta > 0
                          } else if (swipeable) {
+                              if (!::mVelocityTracker.isInitialized)
+                                   return false
+
                               mVelocityTracker.addMovement(motionEvent)
                               mVelocityTracker.computeCurrentVelocity(1000)
                               val velocityX = mVelocityTracker.xVelocity
@@ -617,6 +622,10 @@ class RecyclerTouchListener(var act: Activity, recyclerView: RecyclerView) : OnI
                     if (mPaused || !swipeable) {
                          //break
                     }
+
+                    if (!::mVelocityTracker.isInitialized)
+                         return false
+
                     mVelocityTracker.addMovement(motionEvent)
                     val deltaX = motionEvent.rawX - touchedX
                     val deltaY = motionEvent.rawY - touchedY

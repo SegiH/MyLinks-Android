@@ -12,7 +12,7 @@ import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.textfield.TextInputLayout
 
-class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
+class AddEditLinkActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
      private var myLinkItem: MyLink? = null
      private var isAdding: Boolean = false
      private lateinit var Name: TextInputLayout
@@ -25,7 +25,7 @@ class EditActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
           this.setTheme(if (DataService.sharedPreferences.getBoolean("DarkThemeOn", false)) DataService.darkMode else DataService.lightMode)
 
           super.onCreate(savedInstanceState)
-          setContentView(R.layout.editactivity)
+          setContentView(R.layout.addeditlinkactivity)
 
           builder = androidx.appcompat.app.AlertDialog.Builder(this)
 

@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           this.setTheme(if (DataService.sharedPreferences.getBoolean("DarkThemeOn", false)) DataService.darkMode else DataService.lightMode)
 
           super.onCreate(savedInstanceState)
-          setContentView(R.layout.activity_main)
+          setContentView(R.layout.mainactivity)
 
           // Internet connection is always required
           if (!isNetworkAvailable())
@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                     when (viewID) {
                          R.id.delete_link -> DataService.alert(builder, message="Are you sure that you want to delete this link ?", confirmDialog=true, finish={ finish() }) { deleteRow((position)) }
                          R.id.edit_link -> {
-                              val intent = Intent(applicationContext, EditActivity::class.java)
+                              val intent = Intent(applicationContext, AddEditLinkActivity::class.java)
 
                               intent.putExtra(applicationContext.packageName + ".LinkItem", myLinksList[position])
 
@@ -200,7 +200,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                     return true
                }
                R.id.action_add -> { // Add menu
-                    var intent = Intent(this, EditActivity::class.java)
+                    var intent = Intent(this, AddEditLinkActivity::class.java)
 
                     intent.putExtra(applicationContext.packageName + ".IsAdding", true)
                     //intent.putExtra(applicationContext.packageName + ".LinkTypes", myLinksTypes)

@@ -34,11 +34,11 @@
             android:label="settings"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.segihovav.mylinks_android.EditActivity"
+            android:name="com.segihovav.mylinks_android.AddEditLinkActivity"
             android:label=""
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.segihovav.mylinks_android.ManageLinks"
+            android:name="com.segihovav.mylinks_android.ManageInstanceLinks"
             android:label=""
             android:theme="@style/AppTheme.NoActionBar" />
     </application>
