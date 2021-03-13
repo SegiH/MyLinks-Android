@@ -2,6 +2,7 @@ package com.segihovav.mylinks_android
 
 import android.content.Context
 import android.graphics.Color
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +22,12 @@ class RecyclerviewAdapter internal constructor(private val mContext: Context, pr
      override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
           val myLinkItem: MyLink = myLinks[position]
 
-          holder.linkName.text = myLinkItem.Name
+          val displaySize=60
+
+          holder.linkName.text= if (myLinkItem.Name?.length!! > displaySize) myLinkItem.Name?.substring(0,displaySize) else myLinkItem.Name
+
+          // Reduce font size
+          holder.linkName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20F)
 
           if (darkMode)
                rowFG?.setBackgroundColor(Color.GRAY)

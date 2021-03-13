@@ -171,6 +171,8 @@ class SettingsActivity : AppCompatActivity() {
                DataService.MyLinksTitle="Ema Links"
           else if (DataService.MyLinksActiveURL.contains("aba"))
                DataService.MyLinksTitle="Aba Links"
+          else if (DataService.MyLinksActiveURL.contains("segi"))
+               DataService.MyLinksTitle="Segi Links"
 
           if (darkModeToggled)
                finishAffinity()

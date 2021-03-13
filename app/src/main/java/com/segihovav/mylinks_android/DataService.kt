@@ -14,6 +14,7 @@ class DataService: AppCompatActivity() {
      companion object {
           @JvmStatic val getLinksDataEndpoint = "LinkData.php?task=fetchData"
           @JvmStatic val getTypesDataEndpoint = "LinkData.php?task=fetchTypes"
+          @JvmStatic val getSegiTypesDataEndpoint = "LinkData.php?task=fetchSegiTypes"
           @JvmStatic val deleteLinkDataEndpoint = "LinkData.php?task=deleteRow"
           @JvmStatic val lightMode = R.style.ThemeOverlay_MaterialComponents
           @JvmStatic val darkMode = R.style.ThemeOverlay_MaterialComponents_Dark
@@ -24,7 +25,7 @@ class DataService: AppCompatActivity() {
           @JvmStatic var myLinksTypes: ArrayList<MyLinkType> = ArrayList()
           @JvmStatic var myLinksTypeNames: ArrayList<String> = ArrayList()
           @JvmStatic var myLinkInstanceURLSNames: MutableList<String> = mutableListOf()
-          @JvmStatic var MyLinksTitle: String = "AbaLinks"
+          @JvmStatic var MyLinksTitle: String = "MyLinks"
           @JvmStatic var instanceURLType: ArrayList<InstanceURLType> = ArrayList();
           @JvmStatic lateinit var sharedPreferences: SharedPreferences
           @JvmStatic lateinit var myLinksInstancesDataAdapter: ArrayAdapter<String>

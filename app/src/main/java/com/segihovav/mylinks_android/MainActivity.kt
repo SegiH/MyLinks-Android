@@ -69,6 +69,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                DataService.MyLinksTitle="Ema Links"
           else if (DataService.MyLinksActiveURL.contains("aba"))
                DataService.MyLinksTitle="Aba Links"
+          else if (DataService.MyLinksActiveURL.contains("segi"))
+               DataService.MyLinksTitle="Segi Links"
           else
                title = DataService.MyLinksTitle
 
@@ -221,7 +223,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      public override fun onResume() {
           super.onResume()
 
-          readJSONData("Types",DataService.getTypesDataEndpoint,::parseTypesJSON)
+          readJSONData("Types", if (DataService.MyLinksTitle == "Segi Links")  DataService.getSegiTypesDataEndpoint else DataService.getTypesDataEndpoint,::parseTypesJSON)
 
           recyclerviewAdapter?.notifyDataSetChanged()
 
@@ -238,7 +240,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                DataService.MyLinksActiveURL+="/"
 
           if (DataService.myLinksTypes.size == 0 && DataService.MyLinksActiveURL != "")
-               readJSONData("Types",DataService.getTypesDataEndpoint,::parseTypesJSON)
+               readJSONData("Types",if (DataService.MyLinksTitle == "Segi Links")  DataService.getSegiTypesDataEndpoint else DataService.getTypesDataEndpoint,::parseTypesJSON)
      }
 
      public override fun onStop() {
@@ -360,7 +362,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           // attaching data adapter to spinner
           searchTypeIDSpinner.adapter = dataAdapter
 
-          readJSONData("Links",DataService.getLinksDataEndpoint,::parseLinksJSON,isRefreshing)
+          readJSONData("Links",DataService.getLinksDataEndpoint + "&InstanceName=" + DataService.MyLinksTitle.replace(" ","") ,::parseLinksJSON,isRefreshing)
      }
 
      // Read JSON from specific endpoint and call the specified callback after it has been fetched
@@ -385,7 +387,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                        }
                   },
                   {
-                       DataService.alert(builder=AlertDialog.Builder(this), message="An error occurred reading the $dataType with the error $it. Please check your network connection", finish={ finish() }, OKCallback=null)
+                       DataService.alert(builder=AlertDialog.Builder(this), message="An error occurred reading the $dataType with the error $it while retrieving from $DataService.MyLinksActiveURL $endpoint. Please check your network connection", finish={ finish() }, OKCallback=null)
                   }
           )
           requestQueue.add(request)

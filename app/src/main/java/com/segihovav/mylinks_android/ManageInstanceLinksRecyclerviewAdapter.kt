@@ -1,6 +1,7 @@
 package com.segihovav.mylinks_android
 
 import android.content.Context
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +24,7 @@ class ManageInstanceLinksRecyclerviewAdapter internal constructor(private val mC
                return
 
           holder.linkName.text = DataService.instanceURLType[position].Name
+          //holder.linkName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 80F) // tried to set text size
           holder.linkInfo.text = DataService.instanceURLType[position].URL
      }
 
