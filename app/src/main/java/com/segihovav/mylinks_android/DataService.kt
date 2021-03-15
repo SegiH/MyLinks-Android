@@ -1,9 +1,14 @@
 package com.segihovav.mylinks_android
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.Volley
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -28,6 +33,7 @@ class DataService: AppCompatActivity() {
           @JvmStatic var instanceURLs: ArrayList<InstanceURLType> = ArrayList();
           @JvmStatic lateinit var sharedPreferences: SharedPreferences
           @JvmStatic lateinit var myLinksInstancesDataAdapter: ArrayAdapter<String>
+          @JvmStatic lateinit var MainActivityContext: Context;
 
           @JvmStatic fun alert(builder: AlertDialog.Builder, message: String, closeApp: Boolean = false, confirmDialog: Boolean = false, finish: () -> Unit, OKCallback: (() -> Unit)?) {
                builder.setMessage(message).setCancelable(confirmDialog)
@@ -47,7 +53,9 @@ class DataService: AppCompatActivity() {
                alert.show()
           }
 
-          @JvmStatic fun init() {
+          @JvmStatic fun init(thisContext: Context) {
+               this.MainActivityContext=thisContext
+
                for (currInstance in this.instanceURLs) {
                     if (this.MyLinksActiveURL == currInstance.URL)
                          this.MyLinksTitle = currInstance.DisplayName
@@ -120,6 +128,23 @@ class DataService: AppCompatActivity() {
             }
 
             return ""
+          }
+
+          private fun processData(getLinkDataEndpoint: String, params: String,isAdding: Boolean) {
+               // Fix finish method in alert builder
+               /*var builder = AlertDialog.Builder(this.MainActivityContext)
+
+               val requestQueue: RequestQueue = Volley.newRequestQueue(this.MainActivityContext)
+
+               val request = JsonArrayRequest(
+                       Request.Method.GET, MyLinksActiveURL + getLinkDataEndpoint + params, null,
+                       { _ ->
+                       },
+                       {
+                           alert(builder, message="An error occurred " + if(!isAdding) "saving" else "adding" + " the link with the error " + it.toString(),finish={ this.MainActivityContext }, OKCallback=null)
+                       })
+
+               requestQueue.add(request)*/
           }
      }
 }

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.android.volley.Request
@@ -18,7 +19,7 @@ class AddEditLinkActivity: AppCompatActivity(), AdapterView.OnItemSelectedListen
      private lateinit var Name: TextInputLayout
      private lateinit var URL: TextInputLayout
      private lateinit var typeIDSpinner: Spinner
-     private lateinit var builder: androidx.appcompat.app.AlertDialog.Builder
+     private lateinit var builder: AlertDialog.Builder
 
      override fun onCreate(savedInstanceState: Bundle?) {
           DataService.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
@@ -27,7 +28,7 @@ class AddEditLinkActivity: AppCompatActivity(), AdapterView.OnItemSelectedListen
           super.onCreate(savedInstanceState)
           setContentView(R.layout.addeditlinkactivity)
 
-          builder = androidx.appcompat.app.AlertDialog.Builder(this)
+          builder = AlertDialog.Builder(this)
 
           val titleBar=findViewById<TextView>(R.id.TitleBar)
 
@@ -55,10 +56,10 @@ class AddEditLinkActivity: AppCompatActivity(), AdapterView.OnItemSelectedListen
                     isAdding = false
                }
 
-               // remove "All" link type
+               // remove "All" link type when adding/editing a link
                DataService.myLinksTypeNames.remove("All")
 
-               // When adding a link,
+               // When adding a link, add blank item
                if (isAdding)
                     DataService.myLinksTypeNames.add(0,"")
 
@@ -70,11 +71,13 @@ class AddEditLinkActivity: AppCompatActivity(), AdapterView.OnItemSelectedListen
 
                // Existing item
                if (!isAdding) {
+                    // Link is passed as a parcel
                     myLinkItem=extras.getParcelable<MyLink>(applicationContext.packageName + ".LinkItem") // Get Link Item
 
                     // set the title
                     titleBar.text = "${DataService.getActiveInstanceDisplayName()} # ${myLinkItem?.ID}"
 
+                    // Set Name, URL and Type fields from the parcel
                     Name.editText?.setText(myLinkItem?.Name)
 
                     URL.editText?.setText(myLinkItem?.URL)

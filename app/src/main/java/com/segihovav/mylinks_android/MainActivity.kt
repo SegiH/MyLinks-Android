@@ -44,7 +44,9 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      override fun onCreate(savedInstanceState: Bundle?) {
           DataService.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
-          DataService.init()
+          DataService.init(this)
+
+          //DataService.setContext(this.baseContext)
 
           this.setTheme(if (DataService.sharedPreferences.getBoolean("DarkThemeOn", false)) DataService.darkMode else DataService.lightMode)
 
