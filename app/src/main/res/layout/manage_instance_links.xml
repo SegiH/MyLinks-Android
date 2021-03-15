@@ -91,7 +91,7 @@
     <androidx.recyclerview.widget.RecyclerView
          android:id="@+id/URLList"
          android:layout_width="match_parent"
-         android:layout_height="210dp"
+         android:layout_height="wrap_content"
          android:clipToPadding="true"
          android:orientation="horizontal"
          android:overScrollMode="never"

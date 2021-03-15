@@ -24,9 +24,8 @@ class DataService: AppCompatActivity() {
           @JvmStatic var MyLinksActiveURL: String = ""
           @JvmStatic var myLinksTypes: ArrayList<MyLinkType> = ArrayList()
           @JvmStatic var myLinksTypeNames: ArrayList<String> = ArrayList()
-          @JvmStatic var myLinkInstanceURLSNames: MutableList<String> = mutableListOf()
-          @JvmStatic var MyLinksTitle: String = "MyLinks"
-          @JvmStatic var instanceURLType: ArrayList<InstanceURLType> = ArrayList();
+          @JvmStatic var MyLinksTitle: String = ""
+          @JvmStatic var instanceURLs: ArrayList<InstanceURLType> = ArrayList();
           @JvmStatic lateinit var sharedPreferences: SharedPreferences
           @JvmStatic lateinit var myLinksInstancesDataAdapter: ArrayAdapter<String>
 
@@ -49,6 +48,11 @@ class DataService: AppCompatActivity() {
           }
 
           @JvmStatic fun init() {
+               for (currInstance in this.instanceURLs) {
+                    if (this.MyLinksActiveURL == currInstance.URL)
+                         this.MyLinksTitle = currInstance.DisplayName
+               }
+
                if (!useFirebase)
                     return
 
@@ -62,18 +66,16 @@ class DataService: AppCompatActivity() {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                          val dataList = dataSnapshot.children.toList()
 
-                         instanceURLType.clear()
-                         myLinkInstanceURLSNames.clear()
+                         instanceURLs.clear()
 
                          for (linkItem in dataList) {
-                             instanceURLType.add(InstanceURLType(linkItem.key.toString(),linkItem.value.toString()))
-                             myLinkInstanceURLSNames.add(linkItem.key.toString())
+                             instanceURLs.add(InstanceURLType(linkItem.key.toString(),linkItem.value.toString(),""))
                          }
 
                          try {
                            myLinksInstancesDataAdapter.notifyDataSetChanged()
                          }  catch(e: Exception) {}
-                      
+
                     }
 
                     override fun onCancelled(error: DatabaseError) {
@@ -88,6 +90,36 @@ class DataService: AppCompatActivity() {
 
                myRefAdd = database.getReference("MyLinks/EmaLinks")
                myRefAdd.setValue("https://emalinks.hovav.org");
+          }
+
+          fun getInstanceDisplayNames(): MutableList<String> {
+               var myLinkInstanceURLSNames: MutableList<String> = mutableListOf()
+
+               for (currInstance in this.instanceURLs) {
+                    myLinkInstanceURLSNames.add(currInstance.DisplayName)
+               }
+
+               return myLinkInstanceURLSNames
+          }
+
+          fun getActiveInstanceName(): String {
+               for (currInstance in this.instanceURLs) {
+                    if (this.MyLinksActiveURL == currInstance.URL + if (currInstance.URL.takeLast(1) != "/") "/" else "")
+                         return currInstance.Name
+               }
+
+               return ""
+           }
+
+          fun getActiveInstanceDisplayName(): String {
+            for (currInstance in this.instanceURLs) {
+                 if (this.MyLinksActiveURL == currInstance.URL + if (currInstance.URL.takeLast(1) != "/") "/" else "") {
+                      this.MyLinksTitle = currInstance.DisplayName
+                      return currInstance.DisplayName
+                 }
+            }
+
+            return ""
           }
      }
 }

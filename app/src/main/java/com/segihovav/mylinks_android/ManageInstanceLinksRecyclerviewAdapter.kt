@@ -1,7 +1,6 @@
 package com.segihovav.mylinks_android
 
 import android.content.Context
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,12 +19,12 @@ class ManageInstanceLinksRecyclerviewAdapter internal constructor(private val mC
      }
 
      override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-          if (position >= DataService.instanceURLType.size)
+          if (position >= DataService.instanceURLs.size)
                return
 
-          holder.linkName.text = DataService.instanceURLType[position].Name
+          holder.linkName.text = DataService.instanceURLs[position].DisplayName
           //holder.linkName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 80F) // tried to set text size
-          holder.linkInfo.text = DataService.instanceURLType[position].URL
+          holder.linkInfo.text = DataService.instanceURLs[position].URL
      }
 
      override fun getItemCount(): Int {

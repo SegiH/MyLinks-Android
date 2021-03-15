@@ -18,7 +18,7 @@ import org.json.JSONException
 
 class SettingsActivity : AppCompatActivity() {
      private lateinit var switchDarkMode: SwitchMaterial
-     private lateinit var usefirebaseInstanceURLS: SwitchMaterial
+     private lateinit var useFirebaseInstanceURLS: SwitchMaterial
      private lateinit var myLinksURLs: Spinner
 
      private var darkModeToggled = false
@@ -41,14 +41,29 @@ class SettingsActivity : AppCompatActivity() {
 
           DataService.useFirebase = DataService.sharedPreferences.getBoolean("UseFirebase", false)
 
-          if (!DataService.useFirebase) {
+          DataService.myLinksInstancesDataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,DataService.getInstanceDisplayNames() as List<String>)
+
+           // attaching data adapter to spinner
+           myLinksURLs.adapter = DataService.myLinksInstancesDataAdapter
+
+           DataService.myLinksInstancesDataAdapter.notifyDataSetChanged()
+
+           if (DataService.sharedPreferences.getString("MyLinksActiveURL", "") != "") {
+                for (i in DataService.instanceURLs.indices)
+                     if (DataService.instanceURLs[i].URL == DataService.sharedPreferences.getString("MyLinksActiveURL", ""))
+                          myLinksURLs.setSelection(i)
+           } else {
+               DataService.alert(androidx.appcompat.app.AlertDialog.Builder(this), message = "Please select the active MyLinks URL", finish = { finish() }, OKCallback = null)
+           }
+
+          /*if (!DataService.useFirebase) {
                loadInstanceURLsFromREST()
           } else {
                loadInstanceURLsFromFirebase()
-          }
+          }*/
 
-          usefirebaseInstanceURLS = findViewById(R.id.switchInstanceURLSource)
-          usefirebaseInstanceURLS.isChecked = DataService.useFirebase
+          useFirebaseInstanceURLS = findViewById(R.id.switchInstanceURLSource)
+          useFirebaseInstanceURLS.isChecked = DataService.useFirebase
      }
 
      fun darkModeClick(v: View?) {
@@ -64,14 +79,14 @@ class SettingsActivity : AppCompatActivity() {
      fun loadInstanceURLsFromFirebase() {
           DataService.init()
 
-          DataService.myLinksInstancesDataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,DataService.myLinkInstanceURLSNames as List<String>)
+          DataService.myLinksInstancesDataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,DataService.getInstanceDisplayNames() as List<String>)
 
           // attaching data adapter to spinner
           myLinksURLs.adapter = DataService.myLinksInstancesDataAdapter
 
           if (DataService.sharedPreferences.getString("MyLinksActiveURL", "") != "") {
-               for (i in DataService.instanceURLType.indices)
-                    if (DataService.instanceURLType[i].URL == DataService.sharedPreferences.getString("MyLinksActiveURL", ""))
+               for (i in DataService.instanceURLs.indices)
+                    if (DataService.instanceURLs[i].URL == DataService.sharedPreferences.getString("MyLinksActiveURL", ""))
                          myLinksURLs.setSelection(i)
           } else {
                DataService.alert(androidx.appcompat.app.AlertDialog.Builder(this), message = "Please select the active MyLinks URL", finish = { finish() }, OKCallback = null)
@@ -92,53 +107,6 @@ class SettingsActivity : AppCompatActivity() {
           myLinksURLs.layoutParams=params
      }
 
-     fun loadInstanceURLsFromREST() {
-          val requestQueue: RequestQueue = Volley.newRequestQueue(this)
-
-          val request = JsonArrayRequest(Request.Method.GET, DataService.JSONBaseURL +  "?MyLinks-Instances-Auth=" + DataService.JSONAuthToken + "&task=getURLs", null,
-                  { response ->
-                       var jsonarray: JSONArray = JSONArray()
-
-                       try {
-                            jsonarray = JSONArray(response.toString())
-
-                            DataService.myLinkInstanceURLSNames.clear()
-                            DataService.instanceURLType.clear()
-
-                            for (i in 0 until jsonarray.length()) {
-                                 try {
-                                      val jsonobject = jsonarray.getJSONObject(i)
-
-                                      DataService.instanceURLType.add(InstanceURLType(jsonobject.getString("Name"), jsonobject.getString("URL")))
-                                      DataService.myLinkInstanceURLSNames.add(jsonobject.getString("Name"))
-                                 } catch (e: JSONException) {
-                                      //e.printStackTrace()
-                                      DataService.alert(builder = AlertDialog.Builder(this), message = "An error occurred reading the links. Please check your network connection or the URL in Settings", finish = { finish() }, OKCallback = null)
-                                 }
-                            }
-
-                            DataService.myLinksInstancesDataAdapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,DataService.myLinkInstanceURLSNames as List<String>)
-
-                            // attaching data adapter to spinner
-                            myLinksURLs.adapter = DataService.myLinksInstancesDataAdapter
-
-                            if (DataService.sharedPreferences.getString("MyLinksActiveURL", "") != "") {
-                                 for (i in DataService.instanceURLType.indices)
-                                      if (DataService.instanceURLType[i].URL == DataService.sharedPreferences.getString("MyLinksActiveURL", ""))
-                                           myLinksURLs.setSelection(i)
-                            } else {
-                                 DataService.alert(androidx.appcompat.app.AlertDialog.Builder(this), message = "Please select the active MyLinks URL", finish = { finish() }, OKCallback = null)
-                            }
-                       } catch (e: JSONException) {
-                            e.printStackTrace()
-                       }
-                  },
-                  {
-                       //DataService.alert(builder= AlertDialog.Builder(this), message="An error occurred reading the $dataType with the error $it. Please check your network connection", finish={ finish() }, OKCallback=null)
-                  }
-          )
-          requestQueue.add(request)
-     }
      fun manageURLsClick(v: View?) {
           val intent = Intent(this, ManageInstanceLinks::class.java)
           startActivity(intent)
@@ -153,26 +121,19 @@ class SettingsActivity : AppCompatActivity() {
           val editor = DataService.sharedPreferences.edit()
 
           editor.putBoolean("DarkThemeOn", switchDarkMode.isChecked)
-          editor.putBoolean("UseFirebase", usefirebaseInstanceURLS.isChecked)
+          editor.putBoolean("UseFirebase", useFirebaseInstanceURLS.isChecked)
 
-          DataService.useFirebase=usefirebaseInstanceURLS.isChecked
+          DataService.useFirebase=useFirebaseInstanceURLS.isChecked
 
-          for (i in DataService.instanceURLType.indices) {
-               if (DataService.instanceURLType[i].Name == myLinksURLs.selectedItem) {
-                    editor.putString("MyLinksActiveURL", DataService.instanceURLType[i].URL)
-                    DataService.MyLinksActiveURL = DataService.instanceURLType[i].URL.toString()
+          for (i in DataService.instanceURLs.indices) {
+               if (DataService.instanceURLs[i].DisplayName == myLinksURLs.selectedItem) {
+                    editor.putString("MyLinksActiveURL", DataService.instanceURLs[i].URL)
+                    DataService.MyLinksActiveURL = DataService.instanceURLs[i].URL.toString()
                     break;
                }
           }
 
           editor.apply()
-
-          if (DataService.MyLinksActiveURL.contains("ema"))
-               DataService.MyLinksTitle="Ema Links"
-          else if (DataService.MyLinksActiveURL.contains("aba"))
-               DataService.MyLinksTitle="Aba Links"
-          else if (DataService.MyLinksActiveURL.contains("segi"))
-               DataService.MyLinksTitle="Segi Links"
 
           if (darkModeToggled)
                finishAffinity()
@@ -188,15 +149,10 @@ class SettingsActivity : AppCompatActivity() {
      fun useFirebaseClick(v: View?) {
           val editor = DataService.sharedPreferences.edit()
 
-          editor.putBoolean("UseFirebase", usefirebaseInstanceURLS.isChecked)
+          editor.putBoolean("UseFirebase", useFirebaseInstanceURLS.isChecked)
 
-          DataService.useFirebase=usefirebaseInstanceURLS.isChecked
+          DataService.useFirebase=useFirebaseInstanceURLS.isChecked
 
           editor.apply()
-
-          if (usefirebaseInstanceURLS.isChecked)
-               loadInstanceURLsFromFirebase()
-          else
-               loadInstanceURLsFromREST()
      }
 }

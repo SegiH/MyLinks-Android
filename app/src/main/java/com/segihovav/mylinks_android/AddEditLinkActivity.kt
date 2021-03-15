@@ -73,7 +73,7 @@ class AddEditLinkActivity: AppCompatActivity(), AdapterView.OnItemSelectedListen
                     myLinkItem=extras.getParcelable<MyLink>(applicationContext.packageName + ".LinkItem") // Get Link Item
 
                     // set the title
-                    titleBar.text = "${DataService.MyLinksTitle} # ${myLinkItem?.ID}"
+                    titleBar.text = "${DataService.getActiveInstanceDisplayName()} # ${myLinkItem?.ID}"
 
                     Name.editText?.setText(myLinkItem?.Name)
 

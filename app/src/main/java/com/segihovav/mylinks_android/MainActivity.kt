@@ -25,6 +25,7 @@ import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.Volley
+import com.segihovav.mylinks_android.DataService.Companion.MyLinksActiveURL
 import org.json.JSONArray
 import org.json.JSONException
 import java.util.*
@@ -36,6 +37,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      private lateinit var searchView: EditText
      private lateinit var searchTypeIDSpinner: Spinner
      private lateinit var episodeListView: RecyclerView
+     private var isLoading: Boolean = false
      private var recyclerviewAdapter: RecyclerviewAdapter? = null
      private lateinit var touchListener: RecyclerTouchListener
 
@@ -53,34 +55,67 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           if (!isNetworkAvailable())
                DataService.alert(builder=AlertDialog.Builder(this), message="No Internet connection detected. Internet access is needed to use this app.", closeApp=true, finish={ finish() }, OKCallback=null)
 
+          MyLinksActiveURL = if (DataService.sharedPreferences.getString("MyLinksActiveURL", "") != null) DataService.sharedPreferences.getString("MyLinksActiveURL", "").toString() else ""
+
+          val requestQueue: RequestQueue = Volley.newRequestQueue(this)
+
+          this.isLoading = true
+
+          val request = JsonArrayRequest(Request.Method.GET, DataService.JSONBaseURL +  "?MyLinks-Instances-Auth=" + DataService.JSONAuthToken + "&task=getURLs", null,
+               { response ->
+                    var jsonarray: JSONArray = JSONArray()
+
+                    try {
+                         this.isLoading = false
+
+                         jsonarray = JSONArray(response.toString())
+
+                         DataService.instanceURLs.clear()
+
+                         for (i in 0 until jsonarray.length()) {
+                              try {
+                                   val jsonobject = jsonarray.getJSONObject(i)
+
+                                   if (MyLinksActiveURL == jsonobject.getString("URL"))
+                                        DataService.MyLinksTitle =  jsonobject.getString("DisplayName");
+
+                                   title=jsonobject.getString("DisplayName")
+
+                                   DataService.instanceURLs.add(InstanceURLType(jsonobject.getString("Name"), jsonobject.getString("URL"), jsonobject.getString("DisplayName")))
+                              } catch (e: JSONException) {
+                                   //e.printStackTrace()
+                                   DataService.alert(builder = AlertDialog.Builder(this), message = "An error occurred reading the links. Please check your network connection or the URL in Settings", finish = { finish() }, OKCallback = null)
+                              }
+                         }
+
+                         readJSONData("Links",DataService.getLinksDataEndpoint,::parseLinksJSON,true);
+                    } catch (e: JSONException) {
+                         this.isLoading = true
+                         e.printStackTrace()
+                    }
+               },
+               {
+                    DataService.alert(builder= AlertDialog.Builder(this), message="An error occurred reading the instances with the error $it. Please check your network connection", finish={ finish() }, OKCallback=null)
+               }
+          )
+
+          requestQueue.add(request)
+
           // Init the SwipeController
           val mSwipeRefreshLayout = findViewById<SwipeRefreshLayout>(R.id.swipe_container)
 
           // init swipe listener
           mSwipeRefreshLayout.setOnRefreshListener(this)
           mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary, android.R.color.holo_green_dark, android.R.color.holo_orange_dark, android.R.color.holo_blue_dark)
-          mSwipeRefreshLayout.setOnRefreshListener { readJSONData("Links",DataService.getLinksDataEndpoint,::parseLinksJSON,true); searchView.text = searchView.text }
+          mSwipeRefreshLayout.setOnRefreshListener { if (this != null && !this.isLoading) readJSONData("Links",DataService.getLinksDataEndpoint,::parseLinksJSON,true); searchView.text = searchView.text }
 
           episodeListView = findViewById(R.id.episodeList)
 
-          DataService.MyLinksActiveURL=if (DataService.sharedPreferences.getString("MyLinksActiveURL", "") != null) DataService.sharedPreferences.getString("MyLinksActiveURL", "").toString() else ""
-
-          if (DataService.MyLinksActiveURL.contains("ema"))
-               DataService.MyLinksTitle="Ema Links"
-          else if (DataService.MyLinksActiveURL.contains("aba"))
-               DataService.MyLinksTitle="Aba Links"
-          else if (DataService.MyLinksActiveURL.contains("segi"))
-               DataService.MyLinksTitle="Segi Links"
-          else
-               title = DataService.MyLinksTitle
-
-          title = DataService.MyLinksTitle
-
           // Make sure that MyLinksURL always ends in a black slash
-          if (DataService.MyLinksActiveURL != "" && !DataService.MyLinksActiveURL.endsWith("/"))
-               DataService.MyLinksActiveURL+="/"
+          if (MyLinksActiveURL != "" && !MyLinksActiveURL.endsWith("/"))
+               MyLinksActiveURL+="/"
 
-          if (DataService.MyLinksActiveURL == "")
+          if (MyLinksActiveURL == "")
                loadSettingsActivity()
 
           val builder=AlertDialog.Builder(this)
@@ -205,8 +240,6 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                     var intent = Intent(this, AddEditLinkActivity::class.java)
 
                     intent.putExtra(applicationContext.packageName + ".IsAdding", true)
-                    //intent.putExtra(applicationContext.packageName + ".LinkTypes", myLinksTypes)
-                    //intent.putExtra(applicationContext.packageName + ".LinkTypeNames", myLinksTypeNames)
 
                     startActivity(intent)
                }
@@ -223,24 +256,25 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
      public override fun onResume() {
           super.onResume()
 
-          readJSONData("Types", if (DataService.MyLinksTitle == "Segi Links")  DataService.getSegiTypesDataEndpoint else DataService.getTypesDataEndpoint,::parseTypesJSON)
+          title=DataService.getActiveInstanceDisplayName()
+
+          if (!this.isLoading)
+               readJSONData("Types", if (DataService.getActiveInstanceName() == "SegiLinks")  DataService.getSegiTypesDataEndpoint else DataService.getTypesDataEndpoint,::parseTypesJSON)
 
           recyclerviewAdapter?.notifyDataSetChanged()
 
           if (episodeListView.adapter != null) episodeListView.adapter?.notifyDataSetChanged()
-
-          title = DataService.MyLinksTitle
      }
 
      // Event when this activity returns from another activity
      public override fun onStart() {
           super.onStart()
 
-          if (DataService.MyLinksActiveURL != "" && !DataService.MyLinksActiveURL.endsWith("/"))
-               DataService.MyLinksActiveURL+="/"
+          if (MyLinksActiveURL != "" && !MyLinksActiveURL.endsWith("/"))
+               MyLinksActiveURL +="/"
 
-          if (DataService.myLinksTypes.size == 0 && DataService.MyLinksActiveURL != "")
-               readJSONData("Types",if (DataService.MyLinksTitle == "Segi Links")  DataService.getSegiTypesDataEndpoint else DataService.getTypesDataEndpoint,::parseTypesJSON)
+          if (DataService.myLinksTypes.size == 0 && DataService.getActiveInstanceDisplayName() != "" && !this.isLoading)
+               readJSONData("Types",if (DataService.getActiveInstanceName() == "SegiLinks")  DataService.getSegiTypesDataEndpoint else DataService.getTypesDataEndpoint,::parseTypesJSON)
      }
 
      public override fun onStop() {
@@ -258,7 +292,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
           val request = JsonArrayRequest(
-                  Request.Method.GET, DataService.MyLinksActiveURL + DataService.deleteLinkDataEndpoint + params, null,
+                  Request.Method.GET, MyLinksActiveURL + DataService.deleteLinkDataEndpoint + params, null,
                   { _ ->
                   },
                   {
@@ -289,7 +323,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
           recyclerviewAdapter = RecyclerviewAdapter(this, arrayList as MutableList<MyLink>, DataService.myLinksTypes)
 
-          recyclerviewAdapter?.setDarkMode(if (DataService.sharedPreferences.getBoolean("DarkThemeOn", false)) true else false)
+          recyclerviewAdapter?.setDarkMode(DataService.sharedPreferences.getBoolean("DarkThemeOn", false))
 
           layoutManager = LinearLayoutManager(applicationContext)
 
@@ -300,7 +334,7 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
 
           mSwipeRefreshLayout.isRefreshing = false
 
-          episodeListView.setAdapter(recyclerviewAdapter)
+          episodeListView.adapter = recyclerviewAdapter
      }
 
      private fun isNetworkAvailable(): Boolean {
@@ -333,11 +367,10 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                     myLinksList.add(MyLink(jsonobject.getString("ID").toInt(), jsonobject.getString("Name"), jsonobject.getString("URL"), jsonobject.getString("TypeID").toInt()))
                } catch (e: JSONException) {
                     //e.printStackTrace()
-                    DataService.alert(builder=AlertDialog.Builder(this),message ="An error occurred reading the links. Please check your network connection or the URL in Settings", finish={ finish() }, OKCallback=null) }
+                    DataService.alert(builder=AlertDialog.Builder(this),message ="The error $e occurred in parseLinksJSON() when JSONData is $JSONData and is refreshing status is $isRefreshing Please check your network connection or the URL in Settings", finish={ finish() }, OKCallback=null) }
           }
 
-          if (!isRefreshing)
-               initRecyclerView(myLinksList)
+          initRecyclerView(myLinksList)
      }
 
      private fun parseTypesJSON(JSONData: JSONArray,isRefreshing: Boolean = false) {
@@ -362,18 +395,25 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
           // attaching data adapter to spinner
           searchTypeIDSpinner.adapter = dataAdapter
 
-          readJSONData("Links",DataService.getLinksDataEndpoint + "&InstanceName=" + DataService.MyLinksTitle.replace(" ","") ,::parseLinksJSON,isRefreshing)
+          readJSONData("Links",DataService.getLinksDataEndpoint + "&InstanceName=" + DataService.getActiveInstanceName(),::parseLinksJSON,isRefreshing)
      }
 
      // Read JSON from specific endpoint and call the specified callback after it has been fetched
      private fun readJSONData(dataType: String, endpoint: String, JSONCallback: ((JSONData: JSONArray, isRefreshing: Boolean) -> Unit)?, isRefreshing: Boolean = false) {
-          if (DataService.MyLinksActiveURL == "")
+          if (MyLinksActiveURL == "")
                return
+
+          this.isLoading = true;
 
           val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
-          val request = JsonArrayRequest(Request.Method.GET, DataService.MyLinksActiveURL + endpoint, null,
+          val instanceName= DataService.getActiveInstanceName()
+          val newEndpoint= "$endpoint&InstanceName=$instanceName"
+
+          val request = JsonArrayRequest(Request.Method.GET, MyLinksActiveURL + newEndpoint, null,
                   { response ->
+                       this.isLoading = false;
+
                        var jsonarray: JSONArray = JSONArray()
 
                        try {
@@ -387,7 +427,8 @@ class MainActivity : AppCompatActivity(), OnRefreshListener, AdapterView.OnItemS
                        }
                   },
                   {
-                       DataService.alert(builder=AlertDialog.Builder(this), message="An error occurred reading the $dataType with the error $it while retrieving from $DataService.MyLinksActiveURL $endpoint. Please check your network connection", finish={ finish() }, OKCallback=null)
+                       this.isLoading = false
+                       DataService.alert(builder=AlertDialog.Builder(this), message="An error $it occurred in readJSONData when DataService.MyLinksActiveURL=$DataService.$MyLinksActiveURL An error occurred reading the $dataType with the error $it while retrieving from $DataService.MyLinksActiveURL $endpoint. Please check your network connection", finish={ finish() }, OKCallback=null)
                   }
           )
           requestQueue.add(request)

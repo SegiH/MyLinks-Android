@@ -36,7 +36,7 @@ class ManageInstanceLinks : AppCompatActivity(), AdapterView.OnItemSelectedListe
 
           manageLinksRecyclerListView = findViewById(R.id.URLList)
 
-          recyclerviewAdapterInstance = ManageInstanceLinksRecyclerviewAdapter(this, DataService.myLinkInstanceURLSNames)
+          recyclerviewAdapterInstance = ManageInstanceLinksRecyclerviewAdapter(this, DataService.getInstanceDisplayNames())
 
           layoutManager = LinearLayoutManager(applicationContext)
 
@@ -70,9 +70,6 @@ class ManageInstanceLinks : AppCompatActivity(), AdapterView.OnItemSelectedListe
 
      override fun onConfigurationChanged(newConfig: Configuration) {
           super.onConfigurationChanged(newConfig)
-
-          //if (manageLinksRecyclerListView.adapter != null)
-          //     manageLinksRecyclerListView.adapter?.notifyDataSetChanged()
      }
 
      override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) { }
@@ -92,19 +89,18 @@ class ManageInstanceLinks : AppCompatActivity(), AdapterView.OnItemSelectedListe
           }
 
           // Make sure that this URL has not been added before
-          for (i in DataService.instanceURLType.indices) {
-               if (DataService.instanceURLType[i].URL == addMyLinksURL.editText?.text.toString()) {
+          for (i in DataService.instanceURLs.indices) {
+               if (DataService.instanceURLs[i].URL == addMyLinksURL.editText?.text.toString()) {
                  Toast.makeText(applicationContext, "This URL has already been added enter the URL", Toast.LENGTH_LONG).show()
                  return
                }
           }
 
           /// Add to list used for spinner
-          DataService.myLinkInstanceURLSNames.add(addMyLinksName.editText?.text.toString())
-
           recyclerviewAdapterInstance?.notifyDataSetChanged()
 
-          DataService.instanceURLType.add(InstanceURLType(addMyLinksName.editText?.text.toString(),addMyLinksURL.editText?.text.toString()))
+          DataService.instanceURLs.add(InstanceURLType(addMyLinksName.editText?.text.toString(),addMyLinksURL.editText?.text.toString(),""))
+
           // Add to Firebase
           if (DataService.useFirebase) {
               val database = FirebaseDatabase.getInstance()
@@ -137,12 +133,12 @@ class ManageInstanceLinks : AppCompatActivity(), AdapterView.OnItemSelectedListe
           // Delete from Firebase
           if (DataService.useFirebase) {
               val database = FirebaseDatabase.getInstance()
-              var myRef = database.getReference("MyLinks/" + DataService.instanceURLType[deletingItemIndex].Name)
+              var myRef = database.getReference("MyLinks/" + DataService.instanceURLs[deletingItemIndex].Name)
               myRef.removeValue()
           } else {
               val requestQueue: RequestQueue = Volley.newRequestQueue(this)
 
-              val request = JsonArrayRequest(Request.Method.GET, DataService.JSONBaseURL +  "?MyLinks-Instances-Auth=" + DataService.JSONAuthToken + "&task=deleteURL&Name=" + DataService.instanceURLType[deletingItemIndex].Name, null,
+              val request = JsonArrayRequest(Request.Method.GET, DataService.JSONBaseURL +  "?MyLinks-Instances-Auth=" + DataService.JSONAuthToken + "&task=deleteURL&Name=" + DataService.instanceURLs[deletingItemIndex].Name, null,
                       { _ ->
                       },
                       {
@@ -152,8 +148,7 @@ class ManageInstanceLinks : AppCompatActivity(), AdapterView.OnItemSelectedListe
               requestQueue.add(request)
           }
 
-          DataService.instanceURLType.removeAt(deletingItemIndex)
-          DataService.myLinkInstanceURLSNames.removeAt(deletingItemIndex)
+          DataService.instanceURLs.removeAt(deletingItemIndex)
 
           recyclerviewAdapterInstance?.notifyDataSetChanged()
 
@@ -161,7 +156,7 @@ class ManageInstanceLinks : AppCompatActivity(), AdapterView.OnItemSelectedListe
      }
 
      fun goBackClick(v: View?) {
-          if (DataService.instanceURLType.size == 0) {
+          if (DataService.instanceURLs.size == 0) {
                // If there are no MyLink instance URLs unset active URL
                val editor = DataService.sharedPreferences.edit()
                editor.putString("MyLinksActiveURL","")
